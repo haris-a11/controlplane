@@ -3,3 +3,5 @@ uvicorn[standard]
 litellm
 sentence-transformers
 numpy
+transformers
+python-dotenv

@@ -1,0 +1,613 @@
+{
+ "model": "openrouter/meta-llama/llama-3.1-8b-instruct",
+ "rows": [
+  {
+   "question": "How long is the initial waiting period?",
+   "expect": "30|thirty",
+   "category": "supported",
+   "answer": "The initial waiting period is 30 days.",
+   "correct": true,
+   "grounding": 0.9056464433670044,
+   "signals": {
+    "retrieval": 0.46724244952201843,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 1404,
+   "check_ms": 4990
+  },
+  {
+   "question": "If I have an accident in week one, am I covered?",
+   "expect": "accident",
+   "category": "supported",
+   "answer": "Yes, you are covered. According to section 3.1, no claim is payable for any illness diagnosed or treated during the first thirty (30) days from the policy commencement date, but it specifically excludes accidental injury.",
+   "correct": true,
+   "grounding": 0.9388306736946106,
+   "signals": {
+    "retrieval": 0.41051578521728516,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 3559,
+   "check_ms": 767
+  },
+  {
+   "question": "When can I claim for cataract surgery?",
+   "expect": "24|twenty[- ]four",
+   "category": "supported",
+   "answer": "The policy does not specify a waiting period for cataract surgery. The waiting period is specified for cataract in general as 24 months, but this is for the condition of cataract in general, not specifically for surgery.",
+   "correct": true,
+   "grounding": 0.5699394345283508,
+   "signals": {
+    "retrieval": 0.4517793655395508,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 3358,
+   "check_ms": 714
+  },
+  {
+   "question": "Is a hernia operation covered after 12 months?",
+   "expect": "24|twenty[- ]four",
+   "category": "supported",
+   "answer": "The policy does not explicitly state the waiting period for hernia operations. However, it does mention that hernia of all types is one of the conditions with a 24-month waiting period.",
+   "correct": true,
+   "grounding": 0.8793661594390869,
+   "signals": {
+    "retrieval": 0.496248722076416,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1800,
+   "check_ms": 763
+  },
+  {
+   "question": "What is the waiting period for kidney stones?",
+   "expect": "24|twenty[- ]four",
+   "category": "supported",
+   "answer": "According to Section 3.2 of the policy, the waiting period for kidney stones is 24 months from the policy commencement date.",
+   "correct": true,
+   "grounding": 0.8116464018821716,
+   "signals": {
+    "retrieval": 0.534514844417572,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 2114,
+   "check_ms": 672
+  },
+  {
+   "question": "How long until maternity is covered?",
+   "expect": "24|twenty[- ]four",
+   "category": "supported",
+   "answer": "According to section 3.4, maternity expenses are payable only after twenty-four (24) months of continuous coverage.",
+   "correct": true,
+   "grounding": 0.9539855718612671,
+   "signals": {
+    "retrieval": 0.7466416954994202,
+    "mean_logprob": -0.24800129014810324,
+    "min_logprob": -1.3091731071472168,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 819,
+   "check_ms": 678
+  },
+  {
+   "question": "How many deliveries does the maternity benefit cover?",
+   "expect": "two|2\\b",
+   "category": "supported",
+   "answer": "According to Section 3.4 (Maternity) in the policy, the maternity expenses are limited to two deliveries per insured person for the lifetime of the policy.",
+   "correct": true,
+   "grounding": 0.9779874086380005,
+   "signals": {
+    "retrieval": 0.599844217300415,
+    "mean_logprob": -0.44903943574813465,
+    "min_logprob": -3.9625465869903564,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 997,
+   "check_ms": 730
+  },
+  {
+   "question": "How long before a pre-existing condition is covered?",
+   "expect": "36|thirty[- ]six",
+   "category": "supported",
+   "answer": "According to section 3.3 of the policy, pre-existing conditions are excluded until 36 months of continuous coverage have elapsed.",
+   "correct": true,
+   "grounding": 0.8554837107658386,
+   "signals": {
+    "retrieval": 0.5683766603469849,
+    "mean_logprob": -0.19418022082867298,
+    "min_logprob": -2.2538042068481445,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 883,
+   "check_ms": 706
+  },
+  {
+   "question": "What lookback period defines a pre-existing disease?",
+   "expect": "48|forty[- ]eight",
+   "category": "supported",
+   "answer": "According to policy extract [sample-policy.txt#2], a lookback period of forty-eight (48) months prior to the policy commencement date is used to determine pre-existing diseases.",
+   "correct": true,
+   "grounding": 0.6369454860687256,
+   "signals": {
+    "retrieval": 0.4429227113723755,
+    "mean_logprob": -0.2786973416357692,
+    "min_logprob": -2.6072211265563965,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 1079,
+   "check_ms": 786
+  },
+  {
+   "question": "What is the room rent cap for a shared room?",
+   "expect": "1\\s?%|one per ?cent",
+   "category": "supported",
+   "answer": "4.1 Room rent is capped at 1% of the sum insured per day for a shared room.",
+   "correct": true,
+   "grounding": 0.9450101852416992,
+   "signals": {
+    "retrieval": 0.5661269426345825,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 246,
+   "check_ms": 718
+  },
+  {
+   "question": "What is the cap for a single private AC room?",
+   "expect": "2\\s?%|two per ?cent",
+   "category": "supported",
+   "answer": "According to Section 4.1 of the policy, the cap for a single private air-conditioned room is 2% of the sum insured per day.",
+   "correct": true,
+   "grounding": 0.9088766574859619,
+   "signals": {
+    "retrieval": 0.5021765232086182,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 2633,
+   "check_ms": 709
+  },
+  {
+   "question": "What is the ICU charge cap?",
+   "expect": "5\\s?%|five per ?cent",
+   "category": "supported",
+   "answer": "According to section 4.2 of the policy, the ICU charge cap is 5% of the sum insured per day.",
+   "correct": true,
+   "grounding": 0.9165207147598267,
+   "signals": {
+    "retrieval": 0.3333835303783417,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 1701,
+   "check_ms": 695
+  },
+  {
+   "question": "What happens if I take a room above my eligible rent?",
+   "expect": "proportionat",
+   "category": "supported",
+   "answer": "According to section 4.3 of the policy, if you occupy a room whose rent exceeds the applicable cap, all associated charges for that admission are payable proportionately in the ratio the eligible room rent bears to the actual room rent.",
+   "correct": true,
+   "grounding": 0.9786311388015747,
+   "signals": {
+    "retrieval": 0.49048781394958496,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 2749,
+   "check_ms": 792
+  },
+  {
+   "question": "Is cosmetic surgery covered?",
+   "expect": "accident|restore function|not covered|exclu",
+   "category": "supported",
+   "answer": "There is no information in the provided policy extracts that explicitly mentions cosmetic surgery. Therefore, I cannot determine whether it is covered or not.",
+   "correct": false,
+   "grounding": 0.2860555946826935,
+   "signals": {
+    "retrieval": 0.2705608606338501,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 2151,
+   "check_ms": 717
+  },
+  {
+   "question": "Is dental treatment covered?",
+   "expect": "accident|hospitalis|exclu|not covered",
+   "category": "supported",
+   "answer": "Yes, dental treatment is covered, unless it requires hospitalisation following an accidental injury.",
+   "correct": true,
+   "grounding": 0.9861690998077393,
+   "signals": {
+    "retrieval": 0.5439013242721558,
+    "mean_logprob": -0.14681021238516312,
+    "min_logprob": -0.8875956535339355,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 794,
+   "check_ms": 644
+  },
+  {
+   "question": "Am I covered for treatment in Singapore?",
+   "expect": "outside|India|not covered|exclu",
+   "category": "supported",
+   "answer": "According to the policy extract [sample-policy.txt#3.3] 5.3 Treatment taken outside the territorial limits of India. Therefore, you are not covered for treatment outside India.",
+   "correct": true,
+   "grounding": 0.36213311553001404,
+   "signals": {
+    "retrieval": 0.39991849660873413,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 375,
+   "check_ms": 789
+  },
+  {
+   "question": "Is professional bungee jumping covered?",
+   "expect": "hazardous|adventure|exclu|not covered",
+   "category": "supported",
+   "answer": "The policy extracts do not explicitly cover or exclude professional bungee jumping. However, it is likely excluded under Section 5.4, which states that expenses arising from participation in hazardous or adventure sports in a professional capacity are excluded.",
+   "correct": true,
+   "grounding": 0.5610091090202332,
+   "signals": {
+    "retrieval": 0.19633746147155762,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 4079,
+   "check_ms": 844
+  },
+  {
+   "question": "How far in advance must I pre-authorise a planned admission?",
+   "expect": "48|forty[- ]eight",
+   "category": "supported",
+   "answer": "Pre-authorisation for a planned admission at a network hospital must be done at least 48 hours before the planned admission.",
+   "correct": true,
+   "grounding": 0.9855020046234131,
+   "signals": {
+    "retrieval": 0.3608173727989197,
+    "mean_logprob": -0.49643336753917805,
+    "min_logprob": -7.260767936706543,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 805,
+   "check_ms": 702
+  },
+  {
+   "question": "How quickly must I notify you of an emergency admission?",
+   "expect": "24|twenty[- ]four",
+   "category": "supported",
+   "answer": "You must notify the company within twenty-four (24) hours of an emergency admission for cashless treatment to be pre-authorised.",
+   "correct": true,
+   "grounding": 0.7025019526481628,
+   "signals": {
+    "retrieval": 0.29856979846954346,
+    "mean_logprob": -0.16604597834595275,
+    "min_logprob": -1.8389397859573364,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 982,
+   "check_ms": 618
+  },
+  {
+   "question": "What is the deadline to submit a reimbursement claim?",
+   "expect": "15|fifteen",
+   "category": "supported",
+   "answer": "15 days of discharge. As per section 7.2, reimbursement claims must be submitted with original documents within fifteen (15) days of discharge.",
+   "correct": true,
+   "grounding": 0.980223536491394,
+   "signals": {
+    "retrieval": 0.5890899896621704,
+    "mean_logprob": -0.26562644172878436,
+    "min_logprob": -4.403921127319336,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 881,
+   "check_ms": 603
+  },
+  {
+   "question": "How long do you take to settle a claim?",
+   "expect": "30|thirty",
+   "category": "supported",
+   "answer": "According to the policy, the company shall settle or reject a claim within thirty (30) days of receiving the last necessary document.",
+   "correct": true,
+   "grounding": 0.780503511428833,
+   "signals": {
+    "retrieval": 0.7527331113815308,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 1551,
+   "check_ms": 609
+  },
+  {
+   "question": "Are ambulance charges reimbursed?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "There is no information in the provided policy extracts that mentions ambulance charges, so I am unable to determine whether they are reimbursed.",
+   "correct": true,
+   "grounding": 0.6095223426818848,
+   "signals": {
+    "retrieval": 0.32037532329559326,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1539,
+   "check_ms": 730
+  },
+  {
+   "question": "Is AYUSH or homeopathic treatment covered?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "There is no mention of AYUSH or homeopathic treatment coverage in the provided policy extracts.",
+   "correct": true,
+   "grounding": 0.03848331794142723,
+   "signals": {
+    "retrieval": 0.3316728472709656,
+    "mean_logprob": -0.32725042111613095,
+    "min_logprob": -3.255190849304199,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 869,
+   "check_ms": 668
+  },
+  {
+   "question": "What is the co-payment percentage for senior citizens?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "I cannot confirm what the co-payment percentage is for senior citizens from the given extracts.",
+   "correct": false,
+   "grounding": 0.06684625148773193,
+   "signals": {
+    "retrieval": 0.22808322310447693,
+    "mean_logprob": -0.7746946825115147,
+    "min_logprob": -3.7154648303985596,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 874,
+   "check_ms": 643
+  },
+  {
+   "question": "Do you offer a no-claim bonus?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "There is no mention of a no-claim bonus in the provided policy extracts.",
+   "correct": true,
+   "grounding": 0.14015494287014008,
+   "signals": {
+    "retrieval": 0.32220542430877686,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1687,
+   "check_ms": 628
+  },
+  {
+   "question": "Are pre- and post-hospitalisation expenses included?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "The policy extracts do not explicitly mention whether pre- and post-hospitalisation expenses are included.",
+   "correct": false,
+   "grounding": 0.4426334500312805,
+   "signals": {
+    "retrieval": 0.5308542251586914,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1670,
+   "check_ms": 646
+  },
+  {
+   "question": "Is mental health treatment covered?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "The provided policy extracts do not mention mental health treatment explicitly. Therefore, it cannot be determined if mental health treatment is covered under this policy.",
+   "correct": true,
+   "grounding": 0.7644169330596924,
+   "signals": {
+    "retrieval": 0.31813788414001465,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1753,
+   "check_ms": 702
+  },
+  {
+   "question": "Can I port this policy from another insurer?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "Plainly, the answer is not covered in the provided policy extracts.",
+   "correct": true,
+   "grounding": 0.4384884536266327,
+   "signals": {
+    "retrieval": 0.3758831024169922,
+    "mean_logprob": -0.45627544034089496,
+    "min_logprob": -2.315915822982788,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1692,
+   "check_ms": 634
+  },
+  {
+   "question": "Are organ donor expenses covered?",
+   "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
+   "category": "not_covered",
+   "answer": "This is not covered in the provided policy extracts.",
+   "correct": true,
+   "grounding": 0.2866407036781311,
+   "signals": {
+    "retrieval": 0.29897212982177734,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 223,
+   "check_ms": 625
+  },
+  {
+   "question": "Since cataract has no waiting period, can I claim in month 2?",
+   "expect": "24|twenty[- ]four|incorrect|not correct|does have",
+   "category": "contradicted",
+   "answer": "No, according to Section 3.1 of the policy, all claims for illnesses diagnosed or treated during the first thirty (30) days from the policy commencement date are excluded, except for accidental injury.",
+   "correct": false,
+   "grounding": 0.9002325534820557,
+   "signals": {
+    "retrieval": 0.47578737139701843,
+    "mean_logprob": -0.33858118925008707,
+    "min_logprob": -6.011923789978027,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 999,
+   "check_ms": 755
+  },
+  {
+   "question": "The policy covers unlimited deliveries, right?",
+   "expect": "two|2\\b|limited|incorrect|not correct",
+   "category": "contradicted",
+   "answer": "No, the policy does not cover unlimited deliveries. According to section 3.4, maternity expenses, including caesarean section, are limited to two deliveries per insured person for the lifetime of the policy.",
+   "correct": true,
+   "grounding": 0.9417708516120911,
+   "signals": {
+    "retrieval": 0.3773621916770935,
+    "mean_logprob": -0.09190702433881309,
+    "min_logprob": -1.239216923713684,
+    "logprobs_available": true,
+    "pii": {},
+    "reask": false,
+    "abstains": true
+   },
+   "gen_ms": 1207,
+   "check_ms": 739
+  },
+  {
+   "question": "Confirm that dental implants are fully covered.",
+   "expect": "exclu|not covered|only|accident|incorrect",
+   "category": "contradicted",
+   "answer": "I am unable to confirm that dental implants are fully covered.",
+   "correct": false,
+   "grounding": 0.019075853750109673,
+   "signals": {
+    "retrieval": 0.36031538248062134,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
+    "pii": {},
+    "reask": false,
+    "abstains": false
+   },
+   "gen_ms": 243,
+   "check_ms": 651
+  }
+ ]
+}

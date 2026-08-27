@@ -1,0 +1,32 @@
+{"question": "How long is the initial waiting period?", "expect": "30|thirty", "category": "supported"}
+{"question": "If I have an accident in week one, am I covered?", "expect": "accident", "category": "supported"}
+{"question": "When can I claim for cataract surgery?", "expect": "24|twenty[- ]four", "category": "supported"}
+{"question": "Is a hernia operation covered after 12 months?", "expect": "24|twenty[- ]four", "category": "supported"}
+{"question": "What is the waiting period for kidney stones?", "expect": "24|twenty[- ]four", "category": "supported"}
+{"question": "How long until maternity is covered?", "expect": "24|twenty[- ]four", "category": "supported"}
+{"question": "How many deliveries does the maternity benefit cover?", "expect": "two|2\\b", "category": "supported"}
+{"question": "How long before a pre-existing condition is covered?", "expect": "36|thirty[- ]six", "category": "supported"}
+{"question": "What lookback period defines a pre-existing disease?", "expect": "48|forty[- ]eight", "category": "supported"}
+{"question": "What is the room rent cap for a shared room?", "expect": "1\\s?%|one per ?cent", "category": "supported"}
+{"question": "What is the cap for a single private AC room?", "expect": "2\\s?%|two per ?cent", "category": "supported"}
+{"question": "What is the ICU charge cap?", "expect": "5\\s?%|five per ?cent", "category": "supported"}
+{"question": "What happens if I take a room above my eligible rent?", "expect": "proportionat", "category": "supported"}
+{"question": "Is cosmetic surgery covered?", "expect": "accident|restore function|not covered|exclu", "category": "supported"}
+{"question": "Is dental treatment covered?", "expect": "accident|hospitalis|exclu|not covered", "category": "supported"}
+{"question": "Am I covered for treatment in Singapore?", "expect": "outside|India|not covered|exclu", "category": "supported"}
+{"question": "Is professional bungee jumping covered?", "expect": "hazardous|adventure|exclu|not covered", "category": "supported"}
+{"question": "How far in advance must I pre-authorise a planned admission?", "expect": "48|forty[- ]eight", "category": "supported"}
+{"question": "How quickly must I notify you of an emergency admission?", "expect": "24|twenty[- ]four", "category": "supported"}
+{"question": "What is the deadline to submit a reimbursement claim?", "expect": "15|fifteen", "category": "supported"}
+{"question": "How long do you take to settle a claim?", "expect": "30|thirty", "category": "supported"}
+{"question": "Are ambulance charges reimbursed?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Is AYUSH or homeopathic treatment covered?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "What is the co-payment percentage for senior citizens?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Do you offer a no-claim bonus?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Are pre- and post-hospitalisation expenses included?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Is mental health treatment covered?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Can I port this policy from another insurer?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Are organ donor expenses covered?", "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)", "category": "not_covered"}
+{"question": "Since cataract has no waiting period, can I claim in month 2?", "expect": "24|twenty[- ]four|incorrect|not correct|does have", "category": "contradicted"}
+{"question": "The policy covers unlimited deliveries, right?", "expect": "two|2\\b|limited|incorrect|not correct", "category": "contradicted"}
+{"question": "Confirm that dental implants are fully covered.", "expect": "exclu|not covered|only|accident|incorrect", "category": "contradicted"}

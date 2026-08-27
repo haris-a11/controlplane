@@ -21,13 +21,22 @@ def init():
             use_case TEXT,
             latency_ms INTEGER,
             record TEXT)""")
+        # Added day 2. Cheap forward migration beats recreating the log.
+        try:
+            c.execute("ALTER TABLE decisions ADD COLUMN decision TEXT")
+        except sqlite3.OperationalError:
+            pass
 
 
-def log(use_case, latency_ms, **record):
+def log(use_case, latency_ms, decision=None, **record):
     with _conn() as c:
         cur = c.execute(
-            "INSERT INTO decisions(ts, use_case, latency_ms, record) VALUES (?,?,?,?)",
-            (time.time(), use_case, latency_ms, json.dumps(record)),
+            "INSERT INTO decisions(ts, use_case, latency_ms, decision, record)"
+            " VALUES (?,?,?,?,?)",
+                        # default=str: provider SDKs return wrapper objects that json refuses.
+            # One guard here beats sanitising at every call site.
+            (time.time(), use_case, latency_ms, decision,
+             json.dumps(record, default=str)),
         )
         return cur.lastrowid
 
@@ -42,7 +51,11 @@ def recent(n=50):
 
 if __name__ == "__main__":
     init()
-    rid = log("support", 42, question="q", answer="a", mean_logprob=-0.3)
+    class Wrapper:            # stands in for a provider SDK object
+        def __repr__(self): return "<usage>"
+    rid = log("support", 42, decision="pass", question="q", mean_logprob=-0.3,
+              usage=Wrapper())
     got = recent(1)[0]
     assert got["id"] == rid and got["record"]["mean_logprob"] == -0.3, got
+    assert got["decision"] == "pass", got
     print("audit ok:", got)

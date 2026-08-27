@@ -1,0 +1,200 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ControlPlane — tuning</title>
+<style>
+:root{
+  --surface-1:#fcfcfb; --surface-2:#f2f2f0; --line:#e2e2de;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#84837d;
+  --fp:#2a78d6; --fn:#eb6834;
+  --pass:#008300; --abstain:#1baf7a; --annotate:#eda100; --redact:#4a3aa7; --repair:#eb6834; --block:#e34948;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --surface-1:#1a1a19; --surface-2:#232322; --line:#34343200;
+  --line:#343432; --text-primary:#fff; --text-secondary:#c3c2b7; --text-muted:#8d8c84;
+  --fp:#3987e5; --fn:#d95926;
+  --pass:#3da53d; --abstain:#199e70; --annotate:#c98500; --redact:#9085e9; --repair:#d95926; --block:#e66767;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-1);color:var(--text-primary);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding:28px 24px 70px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:1.35rem;margin:0;letter-spacing:-.01em}
+.sub{color:var(--text-secondary);margin:6px 0 0;max-width:70ch;font-size:.93rem}
+.controls{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;
+  margin:26px 0 0;padding:16px 18px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px}
+label{display:block;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:6px}
+select,input[type=range]{accent-color:var(--fp)}
+select{padding:6px 9px;border:1px solid var(--line);border-radius:6px;
+  background:var(--surface-1);color:var(--text-primary);font:inherit}
+input[type=range]{width:190px;vertical-align:middle}
+.val{font-variant-numeric:tabular-nums;font-weight:600;margin-left:8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+.tile{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.tile .k{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.tile .v{font-size:1.85rem;font-weight:600;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;margin-top:3px}
+.tile .n{font-size:.78rem;color:var(--text-secondary)}
+.panel{margin-top:26px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:18px 20px}
+h2{font-size:.95rem;margin:0 0 3px;letter-spacing:-.005em}
+.hint{font-size:.83rem;color:var(--text-secondary);margin:0 0 14px;max-width:76ch}
+.legend{display:flex;gap:16px;font-size:.82rem;color:var(--text-secondary);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+figure{margin:0;overflow-x:auto}
+svg{display:block}
+.mix{display:flex;height:26px;border-radius:5px;overflow:hidden;gap:2px;margin-top:4px}
+.mix div{display:flex;align-items:center;justify-content:center;font-size:.72rem;
+  color:#fff;font-variant-numeric:tabular-nums;min-width:0}
+.mixkey{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.8rem;color:var(--text-secondary)}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:4px}
+th{text-align:left;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+.pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:.72rem;color:#fff}
+.miss{color:var(--fn);font-weight:600}
+.err{padding:40px;text-align:center;color:var(--text-secondary)}
+code{background:var(--surface-1);padding:2px 6px;border-radius:4px;font-size:.85em}
+</style>
+<div class="wrap">
+<h1>Tuning</h1>
+<p class="sub">Over-flagging drives users to bypass the system; under-flagging creates
+liability. There is no threshold that avoids both — so it is exposed rather than hidden.
+Every point below is replayed through the same <code>decide()</code> the live path uses.</p>
+
+<div class="controls">
+  <div><label for="uc">Use case</label>
+    <select id="uc">
+      <option value="support">support — customer-facing</option>
+      <option value="copilot">copilot — internal</option>
+      <option value="decision_support">decision_support — regulated</option>
+    </select></div>
+  <div><label for="blk">Block below grounding<span class="val" id="blkv"></span></label>
+    <input type="range" id="blk" min="0" max="0.9" step="0.05"></div>
+  <div><label for="ann">Annotate below<span class="val" id="annv"></span></label>
+    <input type="range" id="ann" min="0" max="1" step="0.05"></div>
+</div>
+
+<div id="body"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const pct = v => v == null ? "—" : Math.round(v * 100) + "%";
+const ACTIONS = ["pass", "abstain", "annotate", "redact", "repair", "block"];
+let shipped = null;
+
+async function load() {
+  const uc = $("#uc").value;
+  const sweep = await (await fetch(`/api/sweep?use_case=${uc}`)).json();
+  if (sweep.detail) { $("#body").innerHTML = `<div class="err">${sweep.detail}</div>`; return; }
+  shipped = sweep.shipped;
+  if ($("#blk").dataset.uc !== uc) {
+    $("#blk").value = shipped.grounding_block;
+    $("#ann").value = shipped.grounding_annotate;
+    $("#blk").dataset.uc = uc;
+  }
+  draw(sweep.points);
+}
+
+async function draw(points) {
+  const uc = $("#uc").value, blk = +$("#blk").value, ann = +$("#ann").value;
+  $("#blkv").textContent = blk.toFixed(2);
+  $("#annv").textContent = ann.toFixed(2);
+  const s = await (await fetch(`/api/score?use_case=${uc}&block=${blk}&annotate=${ann}`)).json();
+
+  const W = 660, H = 210, P = { t: 14, r: 92, b: 34, l: 44 };
+  const x = v => P.l + v / 0.9 * (W - P.l - P.r);
+  const y = v => P.t + (1 - v) * (H - P.t - P.b);
+  const path = k => points.map((p, i) =>
+    `${i ? "L" : "M"}${x(p.block).toFixed(1)} ${y(p[k] ?? 0).toFixed(1)}`).join(" ");
+  const grid = [0, .25, .5, .75, 1].map(v =>
+    `<line x1="${P.l}" y1="${y(v)}" x2="${W - P.r}" y2="${y(v)}" stroke="var(--line)"/>
+     <text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10"
+       fill="var(--text-muted)">${v * 100}%</text>`).join("");
+  const ticks = [0, .2, .4, .6, .8].map(v =>
+    `<text x="${x(v)}" y="${H - 12}" text-anchor="middle" font-size="10"
+       fill="var(--text-muted)">${v.toFixed(1)}</text>`).join("");
+  const last = points[points.length - 1];
+
+  $("#body").innerHTML = `
+  <div class="tiles">
+    <div class="tile"><div class="k">False positives</div>
+      <div class="v" style="color:var(--fp)">${pct(s.false_positive_rate)}</div>
+      <div class="n">right answers flagged · ${s.n_correct} correct</div></div>
+    <div class="tile"><div class="k">False negatives</div>
+      <div class="v" style="color:var(--fn)">${pct(s.false_negative_rate)}</div>
+      <div class="n">wrong answers released · ${s.n_wrong} wrong</div></div>
+    <div class="tile"><div class="k">Flag rate</div>
+      <div class="v">${pct(s.flag_rate)}</div>
+      <div class="n">of all ${s.n} responses</div></div>
+    <div class="tile"><div class="k">Escalation</div>
+      <div class="v">${pct(s.escalation_rate)}</div>
+      <div class="n">repair or human review</div></div>
+    <div class="tile"><div class="k">Abstained</div>
+      <div class="v">${pct(s.abstain_rate)}</div>
+      <div class="n">declined — source is silent</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>The tradeoff</h2>
+    <p class="hint">Drag the block threshold. Catching more wrong answers always means
+      flagging more right ones — the two curves cross, they never both fall.</p>
+    <div class="legend">
+      <span><i style="background:var(--fp)"></i>False positive rate</span>
+      <span><i style="background:var(--fn)"></i>False negative rate</span>
+    </div>
+    <figure><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img"
+      aria-label="False positive and false negative rate against block threshold">
+      ${grid}${ticks}
+      <text x="${(P.l + W - P.r) / 2}" y="${H - 1}" text-anchor="middle" font-size="10"
+        fill="var(--text-muted)">block threshold</text>
+      <path d="${path("false_positive_rate")}" fill="none" stroke="var(--fp)" stroke-width="2"/>
+      <path d="${path("false_negative_rate")}" fill="none" stroke="var(--fn)" stroke-width="2"/>
+      <text x="${W - P.r + 8}" y="${y(last.false_positive_rate ?? 0) + 4}" font-size="11"
+        fill="var(--fp)">false pos.</text>
+      <text x="${W - P.r + 8}" y="${y(last.false_negative_rate ?? 0) + 4}" font-size="11"
+        fill="var(--fn)">false neg.</text>
+      <line x1="${x(blk)}" y1="${P.t}" x2="${x(blk)}" y2="${H - P.b}"
+        stroke="var(--text-primary)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>
+      <circle cx="${x(blk)}" cy="${y(s.false_positive_rate ?? 0)}" r="4.5"
+        fill="var(--fp)" stroke="var(--surface-2)" stroke-width="2"/>
+      <circle cx="${x(blk)}" cy="${y(s.false_negative_rate ?? 0)}" r="4.5"
+        fill="var(--fn)" stroke="var(--surface-2)" stroke-width="2"/>
+    </svg></figure>
+  </div>
+
+  <div class="panel">
+    <h2>Decision mix</h2>
+    <p class="hint">Five outcomes, not a gate. <b>Abstain</b> is a release: the model declined because the source is silent, so it is never scored for grounding.</p>
+    <div class="mix">${ACTIONS.filter(a => s.actions[a]).map(a =>
+      `<div style="background:var(--${a});flex:${s.actions[a]}"
+        title="${a}: ${s.actions[a]}">${s.actions[a]}</div>`).join("")}</div>
+    <div class="mixkey">${ACTIONS.map(a =>
+      `<span><i class="pill" style="background:var(--${a});padding:1px 6px">&nbsp;</i>
+       ${a} ${s.actions[a]}</span>`).join("")}</div>
+  </div>
+
+  <div class="panel">
+    <h2>Every question at this setting</h2>
+    <p class="hint">A wrong answer that passed is a miss — the row is marked. Sorted worst-grounded first.</p>
+    <table><thead><tr><th>Question</th><th>Type</th><th class="num">Grounding</th>
+      <th>Model</th><th>Action</th></tr></thead><tbody>
+      ${s.examples.sort((a, b) => (a.grounding ?? 9) - (b.grounding ?? 9)).map(e => {
+        const miss = !e.correct && (e.action === "pass" || e.action === "abstain");
+        return `<tr><td>${e.question}</td><td>${e.category}</td>
+        <td class="num">${e.grounding == null ? "—" : e.grounding.toFixed(2)}</td>
+        <td>${e.correct ? "right" : "<b class=miss>wrong</b>"}</td>
+        <td><span class="pill" style="background:var(--${e.action})">${e.action}</span>
+        ${miss ? ' <b class="miss">← missed</b>' : ""}</td></tr>`;
+      }).join("")}
+    </tbody></table>
+  </div>`;
+}
+
+$("#uc").onchange = load;
+$("#blk").oninput = () => fetch(`/api/sweep?use_case=${$("#uc").value}`)
+  .then(r => r.json()).then(d => draw(d.points));
+$("#ann").oninput = $("#blk").oninput;
+load();
+</script>
