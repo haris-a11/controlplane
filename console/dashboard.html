@@ -1,0 +1,421 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ControlPlane — operations</title>
+<link rel="stylesheet" href="/shell.css">
+<style>
+.head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.head .grow{flex:1}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;color:var(--text-muted)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--pass);
+  animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.cols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;
+  align-items:start}
+.cols .panel{margin-top:0}
+.stack{display:flex;flex-direction:column;gap:18px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.chip{padding:3px 10px;border-radius:14px;font-size:.77rem;cursor:pointer;
+  border:1px solid var(--line-strong);background:var(--surface-1);color:var(--text-secondary)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.bars{display:flex;align-items:flex-end;gap:2px;height:110px;margin-top:8px}
+.bars .b{flex:1;min-width:2px;display:flex;flex-direction:column-reverse;
+  border-radius:2px 2px 0 0;overflow:hidden}
+.bars .b span{display:block;width:100%}
+.qitem{border:1px solid var(--line);border-radius:9px;padding:11px 13px;
+  margin-bottom:9px;background:var(--surface-1)}
+.qitem .q{font-size:.86rem;margin-bottom:6px}
+.qitem .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rec{font-size:.8rem;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:11px 13px;max-height:340px;overflow:auto;
+  white-space:pre-wrap;font-family:var(--mono)}
+.big{font-size:1.15rem;font-weight:650;font-variant-numeric:tabular-nums}
+</style>
+<div id="bar"></div>
+<div class="wrap wrap-wide">
+  <div class="head">
+    <div class="grow">
+      <h1>Operations</h1>
+      <p class="sub">Every response the checking layer has seen, who it was for, what
+      was decided and what it cost. The escalation queue and the threshold
+      recommendation are the feedback loop closing.</p>
+    </div>
+    <div>
+      <label for="win">Window</label>
+      <select id="win">
+        <option value="604800">last 7 days</option>
+        <option value="86400">last 24 hours</option>
+        <option value="3600">last hour</option>
+        <option value="0">all time</option>
+      </select>
+    </div>
+    <div>
+      <label for="src">Traffic</label>
+      <select id="src">
+        <option value="all">simulated + live</option>
+        <option value="live">live only</option>
+      </select>
+    </div>
+    <div class="live"><i></i> streaming</div>
+  </div>
+
+  <div id="tiles" class="tiles"></div>
+  <div id="body"></div>
+</div>
+<div id="modal"></div>
+
+<script src="/shell.js"></script>
+<script>
+$("#bar").innerHTML = topbar("/dashboard");
+
+let state = { user: null, use_case: null, action: null, metrics: null };
+const win = () => +$("#win").value;
+const liveOnly = () => $("#src").value === "live";
+const since = () => win() ? (Date.now() / 1000 - win()) : null;
+const q = extra => {
+  const p = new URLSearchParams();
+  if (since()) p.set("since", since().toFixed(0));
+  if (liveOnly()) p.set("live_only", "true");
+  for (const [k, v] of Object.entries(extra || {})) if (v) p.set(k, v);
+  return p.toString();
+};
+
+$("#win").onchange = $("#src").onchange = () => load();
+
+async function load() {
+  try {
+    const [m, users, rows, learn, queue] = await Promise.all([
+      api(`/api/metrics?${q()}`),
+      api(`/api/users?${q()}`),
+      api(`/api/traffic?${q({ user: state.user, use_case: state.use_case, action: state.action, n: 120 })}`),
+      api("/api/learning?use_case=support"),
+      api("/api/queue?n=25"),
+    ]);
+    state.metrics = m;
+    renderTiles(m);
+    renderBody(m, users, rows, learn, queue);
+  } catch (e) {
+    $("#body").innerHTML = `<div class="err">${esc(e.message)}</div>`;
+  }
+}
+
+function renderTiles(m) {
+  const t = m.totals, weeks = t.first_ts && t.last_ts
+    ? Math.max((t.last_ts - t.first_ts) / 604800, 1 / 168) : 1;
+  const perWeek = Math.round(t.n / weeks);
+  $("#tiles").innerHTML = `
+    <div class="tile"><div class="k">Interactions</div>
+      <div class="v">${num(t.n)}</div>
+      <div class="n">≈ ${num(perWeek)}/week · ${num(t.users)} users</div></div>
+    <div class="tile"><div class="k">Flag rate</div>
+      <div class="v">${pct(t.flag_rate)}</div>
+      <div class="n">${num(t.flagged)} responses acted on</div></div>
+    <div class="tile"><div class="k">Escalation</div>
+      <div class="v" style="color:var(--repair)">${pct(t.escalation_rate)}</div>
+      <div class="n">repair or human review</div></div>
+    <div class="tile" title="Latency ControlPlane adds. Total response time is dominated by the model call, which this layer does not control.">
+      <div class="k">p95 added latency</div>
+      <div class="v">${t.p95_check_ms == null ? "—" : Math.round(t.p95_check_ms)}</div>
+      <div class="n">ms of checking · p50 ${
+        t.p50_check_ms == null ? "—" : Math.round(t.p50_check_ms)}</div></div>
+    <div class="tile"><div class="k">p95 end to end</div>
+      <div class="v">${t.p95_latency_ms == null ? "—" : (t.p95_latency_ms / 1000).toFixed(1)}<span
+        style="font-size:.9rem;font-weight:500"> s</span></div>
+      <div class="n">mostly the model, not us</div></div>
+    <div class="tile"><div class="k">Spend</div>
+      <div class="v">${usd(t.cost_usd)}</div>
+      <div class="n">checking overhead ${t.overhead_pct == null ? "—" : t.overhead_pct + "%"}</div></div>
+    <div class="tile"><div class="k">Awaiting review</div>
+      <div class="v" style="color:var(--${m.queue_depth ? "annotate" : "text-primary"})">
+        ${num(m.queue_depth)}</div>
+      <div class="n">held for a human</div></div>
+    <div class="tile"><div class="k">Audit chain</div>
+      <div class="v" style="font-size:1.15rem;color:var(--${m.chain.verified ? "pass" : "block"})">
+        ${m.chain.verified ? "verified" : "BROKEN"}</div>
+      <div class="n">${num(m.chain.rows)} rows hash-chained</div></div>`;
+}
+
+function renderBody(m, users, rows, learn, queue) {
+  const sim = rows.some(r => r.simulated);
+  $("#body").innerHTML = `
+  <div class="panel">
+    <h2>Volume over time</h2>
+    <p class="hint">Each bar is one time bucket, split by what the router decided.
+      ${sim ? `<span class="badge sim">includes simulated traffic</span>` : ""}</p>
+    ${volumeChart(m.series)}
+    <div class="mixkey">${ACTIONS.map(a =>
+      `<span><i class="pill" style="background:var(--${a});padding:1px 6px">&nbsp;</i> ${a}</span>`).join("")}</div>
+  </div>
+
+  <div class="panel">
+    <h2>By use case</h2>
+    <p class="hint">One engine, three policy profiles. The budget is measured against
+      <b>added</b> latency — what the checking layer costs — because end-to-end time is
+      dominated by the model call and budgeting against that would be scoring ourselves
+      on the provider's queue.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Use case</th><th class="num">Volume</th><th class="num">Flagged</th>
+        <th class="num">Escalated</th><th class="num">Abstained</th>
+        <th class="num">p95 added</th><th>vs budget</th><th class="num">Spend</th></tr></thead>
+      <tbody>${Object.entries(m.by_use_case).map(([uc, s]) => {
+        const over = s.p95_check_ms > s.latency_budget_ms;
+        return `<tr><td><code>${esc(uc)}</code></td>
+          <td class="num">${num(s.n)}</td>
+          <td class="num">${pct(s.flag_rate)}</td>
+          <td class="num">${pct(s.escalation_rate)}</td>
+          <td class="num">${pct(s.abstain_rate)}</td>
+          <td class="num">${s.p95_check_ms == null ? "—" : Math.round(s.p95_check_ms)} ms</td>
+          <td><span class="meter" style="width:80px"><i style="width:${
+            Math.min(100, (s.p95_check_ms || 0) / s.latency_budget_ms * 100).toFixed(0)}%;
+            background:var(--${over ? "block" : "pass"})"></i></span>
+            <span class="muted" style="font-size:.74rem"> ${s.latency_budget_ms} ms</span></td>
+          <td class="num">${usd(s.cost_usd)}</td></tr>`;
+      }).join("")}</tbody></table></div>
+  </div>
+
+  <div class="cols" style="margin-top:18px">
+    <div class="stack">
+      <div class="panel">
+        <h2>Traffic</h2>
+        <p class="hint">Live via server-sent events. Click any row for the full
+          decision record and its place in the hash chain.</p>
+        <div class="filters">
+          <span class="muted" style="font-size:.78rem">Filter:</span>
+          ${["support", "copilot", "decision_support"].map(u =>
+            `<span class="chip ${state.use_case === u ? "on" : ""}" data-uc="${u}">${u}</span>`).join("")}
+          ${ACTIONS.map(a =>
+            `<span class="chip ${state.action === a ? "on" : ""}" data-act="${a}">${a}</span>`).join("")}
+          ${state.user ? `<span class="chip on" data-clearuser="1">user: ${esc(state.user)} ✕</span>` : ""}
+          ${(state.use_case || state.action || state.user)
+            ? `<span class="chip" data-clear="1">clear all ✕</span>` : ""}
+        </div>
+        <div class="scroll"><table>
+          <thead><tr><th>When</th><th>User</th><th>Use case</th><th>Question</th>
+            <th>Tiers</th><th>Action</th><th class="num">ms</th></tr></thead>
+          <tbody id="stream">${rows.map(trafficRow).join("")
+            || `<tr><td colspan="7"><div class="empty">No traffic in this window.</div></td></tr>`}</tbody>
+        </table></div>
+      </div>
+
+      <div class="panel">
+        <h2>Users</h2>
+        <p class="hint">Click a user to filter the traffic stream to them.</p>
+        <div class="scroll" style="max-height:330px;overflow-y:auto"><table>
+          <thead><tr><th>User</th><th class="num">Volume</th><th class="num">Flagged</th>
+            <th class="num">Escalated</th><th class="num">Spend</th><th>Use cases</th>
+            <th>Last seen</th></tr></thead>
+          <tbody>${users.slice(0, 60).map(u => `
+            <tr class="clickable" data-user="${esc(u.user_id)}">
+              <td class="mono">${esc(u.user_id)}</td>
+              <td class="num">${num(u.n)}</td>
+              <td class="num" style="color:var(--${u.flag_rate > 0.25 ? "repair" : "text-primary"})">
+                ${pct(u.flag_rate)}</td>
+              <td class="num">${num(u.escalated)}</td>
+              <td class="num">${usd(u.cost_usd)}</td>
+              <td class="muted" style="font-size:.76rem">${u.use_cases.map(esc).join(", ")}</td>
+              <td class="muted" style="font-size:.76rem">${ago(u.last_seen)}</td></tr>`).join("")
+            || `<tr><td colspan="7"><div class="empty">No users yet.</div></td></tr>`}
+          </tbody></table></div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel">
+        <h2>Review queue</h2>
+        <p class="hint">Responses the router held. A verdict here is the only
+          ground truth the system ever gets in production.</p>
+        <div id="queue">${queue.length ? queue.map(queueItem).join("")
+          : `<div class="empty">Nothing held for review.</div>`}</div>
+      </div>
+
+      ${learningPanel(learn)}
+    </div>
+  </div>`;
+
+  $$("[data-uc]").forEach(c => c.onclick = () => {
+    state.use_case = state.use_case === c.dataset.uc ? null : c.dataset.uc; load();
+  });
+  $$("[data-act]").forEach(c => c.onclick = () => {
+    state.action = state.action === c.dataset.act ? null : c.dataset.act; load();
+  });
+  $$("[data-clear]").forEach(c => c.onclick = () => {
+    state = { ...state, user: null, use_case: null, action: null }; load();
+  });
+  $$("[data-clearuser]").forEach(c => c.onclick = () => { state.user = null; load(); });
+  $$("[data-user]").forEach(r => r.onclick = () => { state.user = r.dataset.user; load(); });
+  $$("[data-open]").forEach(r => r.onclick = () => openDecision(+r.dataset.open));
+  wireQueue();
+}
+
+function trafficRow(r) {
+  const rec = r.record || {};
+  return `<tr class="clickable" data-open="${r.id}">
+    <td class="muted" style="font-size:.76rem;white-space:nowrap">${ago(r.ts)}
+      ${r.simulated ? '<span class="badge sim" style="font-size:.62rem">sim</span>' : ""}</td>
+    <td class="mono" style="font-size:.78rem">${esc(r.user_id || "anon")}</td>
+    <td style="font-size:.78rem">${esc(r.use_case)}</td>
+    <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+      title="${esc(rec.question || "")}">${esc((rec.question || "").slice(0, 70))}</td>
+    <td>${tierPath(r.tier_path)}</td>
+    <td>${actionPill(r.decision)}</td>
+    <td class="num">${r.latency_ms ?? "—"}</td></tr>`;
+}
+
+function queueItem(r) {
+  const rec = r.record || {};
+  return `<div class="qitem" data-qid="${r.id}">
+    <div class="q"><b>${esc((rec.question || "").slice(0, 110))}</b></div>
+    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+      ${actionPill(r.decision)}
+      <span class="mono muted" style="font-size:.75rem">${esc(rec.reason || "")}</span>
+      <span class="muted" style="font-size:.75rem">· ${esc(r.use_case)} · ${ago(r.ts)}</span>
+    </div>
+    <div class="acts">
+      <button class="sm" data-v="agree">Correct call</button>
+      <button class="sm" data-v="false_positive">Should have released</button>
+      <button class="sm" data-v="false_negative">Should have caught more</button>
+      <button class="sm" data-open="${r.id}">Detail</button>
+    </div></div>`;
+}
+
+function wireQueue() {
+  $$("#queue .qitem").forEach(item => {
+    $$("[data-v]", item).forEach(b => b.onclick = async e => {
+      e.stopPropagation();
+      try {
+        await api("/api/feedback", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ decision_id: +item.dataset.qid, verdict: b.dataset.v }),
+        });
+        item.style.opacity = ".4";
+        $$("[data-v]", item).forEach(x => x.disabled = true);
+        load();
+      } catch (err) { alert(err.message); }
+    });
+  });
+}
+
+function learningPanel(l) {
+  const t = l.threshold, d = l.disagreements, a = l.audit_sample;
+  return `<div class="panel">
+    <h2>What the loop has learned</h2>
+    <p class="hint">Reviewer verdicts and audit-sampled traffic, turned into a
+      recommendation. Nothing here is applied automatically.</p>
+
+    <h3 style="margin-top:14px">Threshold recommendation</h3>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+      <span class="big">${t.shipped}</span>
+      <span class="muted">→</span>
+      <span class="big" style="color:var(--${t.suggested == null ? "text-muted"
+        : t.suggested === t.shipped ? "pass" : "annotate"})">${t.suggested ?? "—"}</span>
+      <span class="muted" style="font-size:.78rem">grounding_block · ${t.n_labelled} labelled</span>
+    </div>
+    <p class="hint" style="margin:4px 0 0">${esc(t.note)}</p>
+
+    <h3 style="margin-top:16px">False negatives, estimated honestly</h3>
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span class="big">${a.estimated_fn_rate == null ? "—" : pct(a.estimated_fn_rate)}</span>
+      <span class="muted" style="font-size:.78rem">from n=${a.n} audit-sampled responses</span>
+    </div>
+    <p class="hint" style="margin:4px 0 0">${esc(a.note)}</p>
+
+    <h3 style="margin-top:16px">Tier disagreements</h3>
+    <div class="scroll"><table>
+      <tbody>
+        <tr><td>Confident, yet ungrounded</td><td class="num">${num(d.confident_but_ungrounded)}</td></tr>
+        <tr><td>Hesitant, yet well grounded</td><td class="num">${num(d.hesitant_but_grounded)}</td></tr>
+        <tr><td>Judge overturned a high grounding score</td>
+          <td class="num" style="color:var(--repair)">${num(d.judge_overturned_high_grounding)}</td></tr>
+        <tr><td class="muted">Reviewed by a human</td><td class="num">${num(l.reviewed)}</td></tr>
+      </tbody></table></div>
+    <p class="hint" style="margin:10px 0 0">${esc(l.what_this_does_not_do)}</p>
+  </div>`;
+}
+
+/** Stacked bars, one per time bucket. Inline SVG would be overkill for bars. */
+function volumeChart(series) {
+  if (!series.length) return `<div class="empty">no traffic in this window</div>`;
+  const max = Math.max(...series.map(b => b.n), 1);
+  return `<div class="bars">${series.map(b => `
+    <div class="b" style="height:${(b.n / max * 100).toFixed(1)}%"
+      title="${when(b.t)} — ${b.n} responses">
+      ${ACTIONS.filter(a => b[a]).map(a =>
+        `<span style="height:${(b[a] / b.n * 100).toFixed(1)}%;background:var(--${a})"></span>`).join("")}
+    </div>`).join("")}</div>
+  <div style="display:flex;justify-content:space-between;font-size:.72rem;
+    color:var(--text-muted);margin-top:5px">
+    <span>${when(series[0].t)}</span><span>${when(series[series.length - 1].t)}</span></div>`;
+}
+
+/* --- decision detail -------------------------------------------------------- */
+async function openDecision(id) {
+  const d = await api(`/api/decision/${id}`);
+  const r = d.record || {};
+  const g = (r.grounding || {}).grounding;
+  $("#modal").innerHTML = `<div class="modal">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h2>Decision #${d.id}</h2>
+        ${actionPill(d.decision)} ${tierPath(d.tier_path)}
+        <span class="badge ${d.chain_ok ? "ok" : "warn"}">
+          ${d.chain_ok ? "chain verified" : "chain broken"}</span>
+        <button class="sm" id="closem">Close</button>
+      </div>
+      <dl class="kv" style="margin-bottom:14px">
+        <dt>When</dt><dd>${when(d.ts)}</dd>
+        <dt>User</dt><dd class="mono">${esc(d.user_id || "anon")}</dd>
+        <dt>Use case</dt><dd>${esc(d.use_case)}</dd>
+        <dt>Reason</dt><dd class="mono">${esc(r.reason || "")}</dd>
+        <dt>Grounding</dt><dd>${g == null ? "not checked" : g.toFixed(3)}
+          <span class="muted">(Tier 1: ${esc(r.tier1_reason || "—")})</span></dd>
+        <dt>Judge</dt><dd>${r.judge_ran
+          ? `${esc((r.judge || {}).verdict || "unavailable")} —
+             ${esc((r.judge || {}).reason || "")}`
+          : `not run <span class="muted">(${esc(r.judge_reason || "—")})</span>`}</dd>
+        <dt>Sources</dt><dd>${(r.sources || []).map(s =>
+          `${govBadge(s.governance)} <span class="mono" style="font-size:.76rem">${esc(s.source)}</span>`
+          ).join("<br>") || "—"}</dd>
+        <dt>Latency</dt><dd>${ms(d.latency_ms)}
+          <span class="muted">(generate ${ms(r.generated_ms)} · check ${ms(d.check_ms)}${
+            r.sequential_ms ? `, ${ms(r.sequential_ms)} if serial` : ""})</span></dd>
+        <dt>Cost</dt><dd>${usd(d.cost_usd)} model + ${usd(d.check_cost_usd)} checking</dd>
+        <dt>Row hash</dt><dd class="mono" style="font-size:.72rem;overflow-wrap:anywhere">
+          ${esc((d.row_hash || "").slice(0, 32))}…</dd>
+      </dl>
+      <h3>Question</h3>
+      <div class="rec">${esc(r.question || "")}</div>
+      <h3 style="margin-top:12px">Released answer</h3>
+      <div class="rec">${esc(r.answer || "")}</div>
+      ${r.original_answer ? `<h3 style="margin-top:12px">Before the checker acted</h3>
+        <div class="rec">${esc(r.original_answer)}</div>` : ""}
+      <h3 style="margin-top:12px">Full record</h3>
+      <div class="rec">${esc(JSON.stringify(r, null, 1))}</div>
+    </div></div>`;
+  $("#modal .modal").onclick = close;
+  $("#closem").onclick = close;
+  function close() { $("#modal").innerHTML = ""; }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") $("#modal").innerHTML = "";
+});
+
+/* --- live stream ------------------------------------------------------------ */
+const es = new EventSource("/api/events");
+es.onmessage = ev => {
+  const r = JSON.parse(ev.data);
+  if (state.user && r.user_id !== state.user) return;
+  if (state.use_case && r.use_case !== state.use_case) return;
+  if (state.action && r.decision !== state.action) return;
+  const tb = $("#stream");
+  if (!tb) return;
+  tb.insertAdjacentHTML("afterbegin", trafficRow(r));
+  $$("[data-open]", tb)[0].onclick = () => openDecision(r.id);
+  while (tb.children.length > 150) tb.lastElementChild.remove();
+};
+
+// Deep link from the chat page: /dashboard?decision=123
+const deep = new URLSearchParams(location.search).get("decision");
+load().then(() => { if (deep) openDecision(+deep); });
+setInterval(() => { if (!$("#modal").innerHTML) load(); }, 20000);
+</script>

@@ -1,0 +1,29 @@
+Support macro library — canned replies
+Shared drive export. Undated. Maintained ad hoc by the support floor.
+
+MACRO: waiting_period_general
+"Thanks for reaching out! Most conditions have a short waiting period of about a
+month, and after that you're fully covered for everything in the plan."
+
+MACRO: preexisting
+"Pre-existing conditions are covered after twenty-four (24) months of continuous
+coverage with us."
+
+MACRO: room_rent
+"Your room rent limit is 3% of your sum insured per day. Pick any room at or
+under that and there's nothing further to pay."
+
+MACRO: icu
+"ICU charges are covered in full with no sub-limit."
+
+MACRO: reimbursement_window
+"Please send us your original documents within thirty (30) days of discharge and
+we'll take it from there."
+
+MACRO: adventure_sports
+"Injuries from adventure sports are covered as long as the activity was
+organised by a licensed operator."
+
+MACRO: escalation_promise
+"If you're unhappy with a claim decision, we can guarantee a fresh review and a
+reversal within seven working days."

@@ -1,7 +1,11 @@
+# Direct imports only; pip resolves the rest.
 fastapi
 uvicorn[standard]
-litellm
-sentence-transformers
-numpy
-transformers
+litellm                 # model-agnostic provider access
 python-dotenv
+numpy
+sentence-transformers   # retrieval embeddings (MiniLM)
+transformers            # Tier 1 classifier (HHEM-2.1-Open weights in a stock T5)
+torch
+safetensors
+huggingface-hub

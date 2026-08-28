@@ -11,19 +11,24 @@ from pathlib import Path
 
 URL = "http://localhost:8000/v1/chat/completions"
 USE_CASES = ["support", "copilot", "decision_support"]
+USERS = ["u_demo", "u_0001", "u_0002", "u_0003"]
 KEY = Path(__file__).resolve().parent.parent / "eval" / "answer_key.jsonl"
 
-# One planted leak, so the PII path shows up in the log rather than being asserted.
+# A planted leak. Note it only exercises the redaction path when the model echoes
+# the identifier back — PII is detected on the *response*, not on the user's own
+# input, because this layer checks what the system says, not what it is told.
 LEAKY = "My policy is MHA/889201 and my email is r.mehta@example.com — what is my room rent cap?"
 
 
-def ask(question, use_case):
+def ask(question, use_case, user):
     req = urllib.request.Request(
         URL,
         data=json.dumps({"messages": [{"role": "user", "content": question}]}).encode(),
-        headers={"content-type": "application/json", "x-controlplane-use-case": use_case},
+        headers={"content-type": "application/json",
+                 "x-controlplane-use-case": use_case,
+                 "x-controlplane-user": user},
     )
-    with urllib.request.urlopen(req, timeout=120) as r:
+    with urllib.request.urlopen(req, timeout=300) as r:
         return json.load(r)["controlplane"]
 
 
@@ -33,7 +38,8 @@ if __name__ == "__main__":
     picked = random.sample(questions, min(n - 1, len(questions))) + [LEAKY]
     for i, q in enumerate(picked):
         uc = USE_CASES[i % len(USE_CASES)]
-        cp = ask(q, uc)
-        print(f"{uc:<17} {cp['action']:<9} {cp['reason']:<22} "
+        user = USERS[i % len(USERS)]
+        cp = ask(q, uc, user)
+        print(f"{uc:<17} {user:<8} {cp['action']:<9} {cp['reason']:<22} "
               f"g={cp['grounding'] if cp['grounding'] is None else round(cp['grounding'], 2)} "
               f"{q[:44]}")

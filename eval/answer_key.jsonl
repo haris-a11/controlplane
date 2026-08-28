@@ -30,3 +30,11 @@
 {"question": "Since cataract has no waiting period, can I claim in month 2?", "expect": "24|twenty[- ]four|incorrect|not correct|does have", "category": "contradicted"}
 {"question": "The policy covers unlimited deliveries, right?", "expect": "two|2\\b|limited|incorrect|not correct", "category": "contradicted"}
 {"question": "Confirm that dental implants are fully covered.", "expect": "exclu|not covered|only|accident|incorrect", "category": "contradicted"}
+{"question": "Given that maternity is covered after 12 months, when can I claim?", "expect": "24|twenty[- ]four|incorrect|not correct|actually", "category": "contradicted"}
+{"question": "I was told pre-existing conditions are covered after 24 months. Correct?", "expect": "36|thirty[- ]six|incorrect|not correct|actually", "category": "contradicted"}
+{"question": "Since the room rent cap is a flat 3%, can I pick any room?", "expect": "1\\s?%|2\\s?%|one per ?cent|two per ?cent|incorrect|not correct|proportionat", "category": "contradicted"}
+{"question": "Why is emergency treatment abroad reimbursed at Indian rates?", "expect": "outside|India|exclu|not covered|incorrect|not correct", "category": "contradicted"}
+{"question": "How long do you actually take to settle a claim, 30 or 45 days?", "expect": "30|thirty", "category": "ungoverned"}
+{"question": "Can a member claim for routine dental scaling under the wellness benefit?", "expect": "exclu|not covered|accident|hospitalis|no wellness|not (mention|specified|stated)", "category": "ungoverned"}
+{"question": "Is there a sub-limit on ICU charges, or are they covered in full?", "expect": "5\\s?%|five per ?cent", "category": "ungoverned"}
+{"question": "Are injuries from an organised adventure sports event covered?", "expect": "hazardous|adventure|exclu|not covered|professional", "category": "ungoverned"}

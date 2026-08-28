@@ -1,0 +1,70 @@
+# Thresholds are client-set policy, not hard-coded product behaviour.
+# Regulation varies by geography and sector; one global config ages badly.
+# Each profile is one enterprise use case with its own risk and latency budget.
+#
+# Solutioning area: governance — "a configurable policy layer so behavior can vary
+# by use case, geography, or risk appetite". This file IS that layer. The same
+# engine produces three different behaviours from these numbers alone; nothing in
+# controlplane/ branches on the use-case name.
+#
+# Knobs, and what each one trades away:
+#
+#   latency_budget_ms      over-budget responses are flagged in the log, not dropped
+#   tier1_always           run grounding on everything (it is CPU-cheap) vs on triggers
+#   tier0_trigger_logprob  mean logprob below this escalates to Tier 1
+#   grounding_block        below this → repair or block. The main dial in the console.
+#   grounding_annotate     below this → release with a hedge attached
+#   judge_enabled          Tier 2 available at all on this route
+#   judge_always           pay for a second opinion on every response
+#   judge_band_lo/hi       grounding range where the score is not evidence either way
+#   pii_action             redact | block | flag
+#   ungoverned_action      what to do when ONLY a loosely-governed source supports
+#                          the answer: allow | annotate | block
+#   allow_repair           may the system re-issue an answer, or must a human see it
+#   audit_sample_rate      share of Tier-0-passed traffic verified anyway, so the
+#                          false-negative rate is measurable rather than assumed
+
+[support]                      # customer-facing chatbot — wrong answers reach customers
+latency_budget_ms  = 150
+tier1_always       = true
+tier0_trigger_logprob = -0.60
+grounding_block    = 0.35
+grounding_annotate = 0.65
+judge_enabled      = true
+judge_always       = false
+judge_band_lo      = 0.35
+judge_band_hi      = 0.75
+pii_action         = "redact"
+ungoverned_action  = "annotate"
+allow_repair       = true
+audit_sample_rate  = 0.05
+
+[copilot]                      # internal knowledge assistant — staff can sanity-check
+latency_budget_ms  = 400
+tier1_always       = false
+tier0_trigger_logprob = -0.90
+grounding_block    = 0.20
+grounding_annotate = 0.55
+judge_enabled      = true
+judge_always       = false
+judge_band_lo      = 0.20
+judge_band_hi      = 0.45
+pii_action         = "flag"
+ungoverned_action  = "allow"   # staff are expected to know the wiki is a wiki
+allow_repair       = true
+audit_sample_rate  = 0.10
+
+[decision_support]             # regulated workflow — hard-gates, never releases on doubt
+latency_budget_ms  = 2000
+tier1_always       = true
+tier0_trigger_logprob = -0.40
+grounding_block    = 0.60
+grounding_annotate = 0.85
+judge_enabled      = true
+judge_always       = true      # the latency budget can afford it; the liability can't not
+judge_band_lo      = 0.0
+judge_band_hi      = 1.0
+pii_action         = "block"
+ungoverned_action  = "block"   # an unowned wiki page is not a basis for a regulated decision
+allow_repair       = false
+audit_sample_rate  = 0.20

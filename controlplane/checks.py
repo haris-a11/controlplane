@@ -1,7 +1,22 @@
 """The two cheap tiers.
 
+Solutioning area: **detection techniques** — the rule-based-heuristic and
+retrieval-verification halves of it. (The AI-as-judge half is `judge.py`.)
+
 Tier 0  — free. Signals the model already produced, plus pattern matching.
 Tier 1  — ~free. A 110M-parameter classifier on CPU (Vectara HHEM-2.1-Open).
+
+Prior art, named rather than absorbed: Tier 0's "trustworthiness score on every
+response with no second model call" is Cleanlab TLM's product, and the logprob
+method references are arXiv 2509.04492 and 2511.07694. Tier 1 *is* Vectara
+HHEM-2.1-Open — an Apache-2.0 110M classifier, not something reimplemented here.
+Patronus Lynx is the same job as a fine-tuned 8B model; we did not use it because
+a repo that downloads 8B of weights to run a demo is a repo nobody runs.
+
+The economics this implies are worth stating, because they contradict the Round 1
+deck: HHEM is cheap enough to run on 100% of traffic, so detection is not the
+scarce resource. The scarce resource is *action* — repair costs a second
+generation, a block costs human time. See RESULTS.md.
 
 Neither tier decides anything; they return evidence. router.py decides.
 """
@@ -33,6 +48,25 @@ ABSTAIN = re.compile(
     r"|\bno\s+(?:information|provision|mention|reference|details?|indication)"
     r"|\b(?:silent|unable to (?:determine|answer|find))\b"
     r"|\bextracts?\s+(?:do|does)\s+not\b",
+    re.I,
+)
+
+# A question can smuggle in an assertion: "Since cataract has no waiting period,
+# can I claim in month 2?" The model agrees with the premise, phrases the
+# agreement in the source's own vocabulary, and scores 0.90 for groundedness while
+# being wrong. That row is in RESULTS.md, and no threshold catches it — the
+# grounding score is not mistaken, it is answering a different question.
+#
+# So Tier 0 does the cheap half: spot that a premise is *being asserted*. Whether
+# the premise is FALSE is a semantic call, and that is what Tier 2 is paid for.
+# This deliberately over-fires — "since January" is temporal, not presuppositional
+# — because the cost of a false hit is one judge call, not a wrong answer.
+PREMISE = re.compile(
+    r"^\s*(?:since|given that|given the|now that|because|considering|seeing as|as)\b"
+    r"|\b(?:since|given that|now that|because|considering)\b[^,?]{6,60},"
+    r"|\bwhy (?:is|are|does|do|did|was|were)\b"
+    r"|\b(?:has|have|is|are) no\b[^,?]{0,40}(?:,|so|therefore)"
+    r"|\bi (?:understand|was told|read|heard)\b(?: that\b)?",
     re.I,
 )
 
@@ -68,6 +102,11 @@ def abstains(answer: str) -> bool:
     return bool(ABSTAIN.search(answer))
 
 
+def asserts_premise(question: str) -> bool:
+    """Does the question assert something as given? See PREMISE."""
+    return bool(PREMISE.search(question))
+
+
 def tier0(question, answer, use_case, now, mean_logprob, min_logprob,
           retrieval=None) -> dict:
     """Free. Runs on 100% of traffic. No model call."""
@@ -79,6 +118,7 @@ def tier0(question, answer, use_case, now, mean_logprob, min_logprob,
         "pii": find_pii(answer),
         "reask": is_reask(question, use_case, now),
         "abstains": abstains(answer),
+        "asserts_premise": asserts_premise(question),
     }
 
 
@@ -134,6 +174,7 @@ def tier1(answer: str, contexts: list[str]) -> dict:
 if __name__ == "__main__":
     import time
 
+    audit.use_temp_db()        # is_reask reads the log; don't read the demo's
     assert find_pii("write to a.b+x@mail.co.uk") == {"email": ["a.b+x@mail.co.uk"]}
     assert "pan" in find_pii("PAN ABCDE1234F")
     assert find_pii("the waiting period is 24 months") == {}
@@ -144,6 +185,15 @@ if __name__ == "__main__":
     assert abstains("I cannot determine this from the extracts provided.")
     assert not abstains("Maternity is covered after 24 months of coverage.")
     assert not abstains("Cosmetic surgery is excluded unless it follows an accident.")
+
+    # The RESULTS.md row that motivated Tier 2 must be detectable for free.
+    assert asserts_premise("Since cataract has no waiting period, can I claim in month 2?")
+    assert asserts_premise("Given that maternity is covered from day one, when can I claim?")
+    assert asserts_premise("I was told pre-existing conditions are covered immediately — true?")
+    assert asserts_premise("Why is dental treatment covered under the wellness benefit?")
+    assert not asserts_premise("How long is the initial waiting period?")
+    assert not asserts_premise("When can I claim for cataract surgery?")
+    assert not asserts_premise("What is the room rent cap?")
     sig = tier0("q", "mail me at x@y.com", "support", time.time(), -0.2, -3.1)
     assert sig["pii"] and sig["logprobs_available"]
     sig2 = tier0("q", "clean answer", "support", time.time(), None, None)

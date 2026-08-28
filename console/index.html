@@ -1,62 +1,9 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ControlPlane — tuning</title>
-<style>
-:root{
-  --surface-1:#fcfcfb; --surface-2:#f2f2f0; --line:#e2e2de;
-  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#84837d;
-  --fp:#2a78d6; --fn:#eb6834;
-  --pass:#008300; --abstain:#1baf7a; --annotate:#eda100; --redact:#4a3aa7; --repair:#eb6834; --block:#e34948;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --surface-1:#1a1a19; --surface-2:#232322; --line:#34343200;
-  --line:#343432; --text-primary:#fff; --text-secondary:#c3c2b7; --text-muted:#8d8c84;
-  --fp:#3987e5; --fn:#d95926;
-  --pass:#3da53d; --abstain:#199e70; --annotate:#c98500; --redact:#9085e9; --repair:#d95926; --block:#e66767;
-}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--surface-1);color:var(--text-primary);
-  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding:28px 24px 70px}
-.wrap{max-width:1080px;margin:0 auto}
-h1{font-size:1.35rem;margin:0;letter-spacing:-.01em}
-.sub{color:var(--text-secondary);margin:6px 0 0;max-width:70ch;font-size:.93rem}
-.controls{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;
-  margin:26px 0 0;padding:16px 18px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px}
-label{display:block;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:6px}
-select,input[type=range]{accent-color:var(--fp)}
-select{padding:6px 9px;border:1px solid var(--line);border-radius:6px;
-  background:var(--surface-1);color:var(--text-primary);font:inherit}
-input[type=range]{width:190px;vertical-align:middle}
-.val{font-variant-numeric:tabular-nums;font-weight:600;margin-left:8px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
-.tile{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
-.tile .k{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
-.tile .v{font-size:1.85rem;font-weight:600;font-variant-numeric:tabular-nums;
-  letter-spacing:-.02em;margin-top:3px}
-.tile .n{font-size:.78rem;color:var(--text-secondary)}
-.panel{margin-top:26px;background:var(--surface-2);border:1px solid var(--line);
-  border-radius:8px;padding:18px 20px}
-h2{font-size:.95rem;margin:0 0 3px;letter-spacing:-.005em}
-.hint{font-size:.83rem;color:var(--text-secondary);margin:0 0 14px;max-width:76ch}
-.legend{display:flex;gap:16px;font-size:.82rem;color:var(--text-secondary);margin-bottom:6px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
-figure{margin:0;overflow-x:auto}
-svg{display:block}
-.mix{display:flex;height:26px;border-radius:5px;overflow:hidden;gap:2px;margin-top:4px}
-.mix div{display:flex;align-items:center;justify-content:center;font-size:.72rem;
-  color:#fff;font-variant-numeric:tabular-nums;min-width:0}
-.mixkey{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.8rem;color:var(--text-secondary)}
-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:4px}
-th{text-align:left;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--text-muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
-td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-td.num{font-variant-numeric:tabular-nums;text-align:right}
-.pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:.72rem;color:#fff}
-.miss{color:var(--fn);font-weight:600}
-.err{padding:40px;text-align:center;color:var(--text-secondary)}
-code{background:var(--surface-1);padding:2px 6px;border-radius:4px;font-size:.85em}
-</style>
+<link rel="stylesheet" href="/shell.css">
+<div id="bar"></div>
 <div class="wrap">
 <h1>Tuning</h1>
 <p class="sub">Over-flagging drives users to bypass the system; under-flagging creates
@@ -78,10 +25,9 @@ Every point below is replayed through the same <code>decide()</code> the live pa
 
 <div id="body"></div>
 </div>
+<script src="/shell.js"></script>
 <script>
-const $ = s => document.querySelector(s);
-const pct = v => v == null ? "—" : Math.round(v * 100) + "%";
-const ACTIONS = ["pass", "abstain", "annotate", "redact", "repair", "block"];
+$("#bar").innerHTML = topbar("/console");
 let shipped = null;
 
 async function load() {
