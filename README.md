@@ -10,6 +10,19 @@ Status: **working end to end, and measured.** Numbers in [`RESULTS.md`](RESULTS.
 including the ones that missed their target and the mechanism that turned out not to
 pay for itself.
 
+**Contents.** [Run it](#run-it) · [**Business proposal — five pages**](#business-proposal--five-pages)
+· [What the brief asked for](#what-the-brief-asked-for-and-where-each-piece-is)
+· [The core mechanism](#the-core-mechanism) · [Assumptions](#reference-parameters-and-assumptions)
+· [Prior art](#where-the-ideas-come-from) · [What the measurement found](#what-the-measurement-found)
+· [What it does not do](#what-it-does-not-do) · [Architecture](#architecture)
+· [Dependencies](#dependencies) · [Self-checks](#self-checks)
+
+The organisers ask the README to cover implementation approach, solution architecture,
+dependencies and execution instructions. Execution is under *Run it*; approach and
+architecture run from *The core mechanism* to *Architecture*; dependencies are listed
+there. The business proposal — Round 2's first deliverable — is the five-page section
+below, written to the Round 1 deck's order.
+
 ---
 
 ## Run it
@@ -29,13 +42,21 @@ python -m demo.seed_traffic 12             # real calls across all three profile
 python -m eval.run_eval                    # the measured numbers → RESULTS.md
 ```
 
-Three pages, one app:
+### Two surfaces, deliberately separated
+
+The frontend is what an **end user** sees. The backend console is what an **operator**
+sees. They share no stylesheet and no helper, because they have opposite jobs: a customer
+is not an auditor, and an auditor should not have to reconstruct what the customer saw.
 
 | | | |
 |---|---|---|
-| **Chat** | http://localhost:8000/chat | Ask a question and watch every check run on the answer |
-| **Dashboard** | http://localhost:8000/dashboard | Per-user traffic monitoring, review queue, feedback loop |
-| **Tuning** | http://localhost:8000/console | The false-positive / false-negative dial |
+| **Frontend** — member app | http://localhost:8000/ | Meridian Health Assurance member support. A plain chat client that knows nothing about the checking layer. What ControlPlane did is visible only as an *effect*: an advisory attached to an answer, a redaction, a held reply with a case reference. |
+| **Backend** — operations | http://localhost:8000/console | Every response, who it was for, what was decided and what it cost. Live traffic, per-user monitoring, the review queue, the feedback loop, simulated load control, and the full per-decision inspector. |
+| **Backend** — tuning | http://localhost:8000/console/tuning | The false-positive / false-negative dial. |
+| **Backend** — policy | http://localhost:8000/console/policy | Every knob in `policies.toml` across the three profiles, what each trades away, and the audit chain behind it. |
+
+Run the two side by side: ask a question at `/`, watch the decision arrive at `/console`.
+That is the demo — the member sees an answer, the operator sees why.
 
 Or drive it as a plain OpenAI-compatible endpoint — any app already speaking that
 protocol is checked without knowing it:
@@ -51,6 +72,270 @@ curl localhost:8000/v1/chat/completions \
 The response carries a `controlplane` block alongside the usual OpenAI fields, with the
 full decision path: signals, tier path, grounding per span, judge verdict, action,
 latency breakdown and cost.
+
+---
+
+## Business proposal — five pages
+
+Round 2's first deliverable is a detailed business proposal covering problem framing,
+solution design, target users, business case and impact, a phased roadmap, and key risks
+with mitigations. It is set out below as **five pages**, in the order the Round 1 deck
+used, so the two rounds read as one argument rather than two.
+
+Every number on these pages is measured, simulated or assumed — and labelled as which.
+Round 1's figures were design targets; where a measurement has since disagreed with one,
+the measurement is printed and the target is left visible beside it.
+
+---
+
+### Page 1 — The problem
+
+> **Enterprise AI does not fail in engineering. It fails in review.**
+
+An enterprise can build an assistant in weeks. What it cannot do is prove what the
+assistant said, to whom, and whether it was right. Three risks ride on every response,
+and all three surface only after someone has acted on the answer.
+
+| | Risk | What it looks like | Why it survives today |
+|---|---|---|---|
+| **1** | **Confidently wrong** | The answer states a fact that appears in no source, with total certainty | Confidence scores miss it. A model can be highly confident and completely wrong — **measured here at 0.90–0.97 groundedness on answers that were false** |
+| **2** | **Quietly expensive** | Every query to the largest model; silent retries; re-asks nobody counts | Spend is reported in a billing view, disconnected from the risk decision that caused it |
+| **3** | **Quietly unsafe** | Customer identifiers echoed into an uncleared channel; outcomes that skew across groups | Bias is invisible inside any single response, so a per-response check structurally cannot see it |
+
+**The detection gap.** The damage lands between the response and the complaint:
+
+```
+   AI response  ──▶  user acts on it  ──▶  business impact lands  ──▶  found by complaint
+                     └──────────────── the damage happens here ────────────────┘
+```
+
+The problem is not that enterprises cannot detect risk. It is that they detect it after
+the damage.
+
+**What Round 2 measured that Round 1 could only assert.** On a 40-question answer key
+against a real policy document:
+
+- With no checking at all, **80% of the wrong answers are released** to the user.
+- The answers that most need catching are the ones that look best: the rows requiring a
+  second opinion scored **0.92–0.97** for groundedness with confident log-probabilities.
+  No threshold on how an answer *looks* will ever select them.
+- **4 of 40** answers were supported only by an internal source with no owner — faithful
+  to what the model was shown, and what it was shown was fifteen months stale.
+- A weaker model is not a different problem, it is more of the same one: swapping
+  `llama-3.3-70b` for `llama-3.1-8b` took accuracy from **88% to 62%** with the checker
+  unchanged.
+
+**The complication the brief names, and this proposal does not pretend away.** Over-flagging
+drives users to bypass the system; under-flagging creates liability. There is no threshold
+that avoids both — measured here, raising the block threshold from 0.00 to 0.72 cuts the
+false-negative rate from 40% to 20% and raises false positives from 20% to 60%. Real
+systems *tune* this. The product decision is to make the tuning visible rather than to
+ship a chosen number and call it solved.
+
+---
+
+### Page 2 — The solution
+
+> **ControlPlane: a tiered checking layer between the application and the model.**
+
+RAG still answers the question. ControlPlane adds a risk-aware layer that inspects every
+response, decides *per request* how much checking that response is worth, and acts on the
+result through a ladder of outcomes rather than a binary gate.
+
+```
+   user  ──▶  app + RAG  ──▶  LLM  ──▶  ControlPlane  ──▶  release / intervene
+              (governance-tagged retrieval)   observe · verify · act
+```
+
+Model-agnostic by construction: it is an OpenAI-compatible endpoint, so any application
+already speaking that protocol is checked without knowing it. Checks work at the
+input/output layer only — the design assumes API access to a foundation model and no
+visibility into its internals.
+
+### Three tiers, escalating cost
+
+| Tier | Runs on | Cost | What it does |
+|---|---|---|---|
+| **0 · Signals** | 100% | free | Token log-probabilities the model already produced, PII patterns, re-ask within 60 s, abstention, premise detection. **No second model call.** |
+| **1 · Verifier** | ~100% | ~free, CPU | A 110M-parameter classifier scores the answer against each retrieved span. |
+| **2 · Escalate** | measured 38% on `support`, 65% on the regulated route | expensive | A second model returns a *verdict*; repair and re-issue; human escalation. |
+
+**What changed from Round 1, and why it is a stronger position.** The deck budgeted Tier 1
+at 12% of traffic on the assumption that verification meant sub-agent LLM calls. It does
+not: an Apache-2.0 110M classifier runs on CPU and is cheap enough to run on everything.
+**Detection is no longer the scarce resource — action is.** Repair costs a second
+generation; a block costs human time. Measured: Tier 0 and Tier 1 together add **6.7%** to
+inference spend, while judging every response costs **113%**. That is the economic
+argument for a router, stated as a number rather than a claim, and it pre-empts the
+obvious objection — *why not just check everything?* — instead of being broken by it.
+
+### Six outcomes, not one gate
+
+`pass` · `abstain` · `annotate` · `redact` · `repair` · `block`
+
+Round 1 pitched four. Two were split out because they are different claims about an
+answer. **`redact`** is a leak, settled before any judgement about correctness — an answer
+that declines to answer and still leaks an identifier is still a leak. **`abstain`** is a
+release: *"the policy does not cover this"* is the correct answer to an uncoverable
+question, and scoring it for groundedness punished the model for being right. Separating
+it took the false-positive rate on refusals from **42% to 6%** on the same data.
+
+Reporting "cannot verify" separately from "verified false" is a third outcome every
+product surveyed collapses into a binary. The brief says there is often no real-time
+ground truth; not collapsing that is both more honest and genuinely differentiating.
+
+### Client-set policy, not product behaviour
+
+Thresholds live in `policies.toml`, one profile per route, thirteen knobs each. **Nothing
+in the engine branches on a use-case name** — the three shipped behaviours come from that
+file alone, and a stored decision can be replayed under another profile with no second
+model call. Regulation varies by sector and geography; a hard-coded threshold ages badly.
+
+### The one technical idea to lead with
+
+**You cannot know your false-negative rate without checking things you already passed.**
+
+A random share of Tier-0-passed traffic is sent through full verification anyway. One
+mechanism, three jobs: it produces a continuous unbiased false-negative estimate, which
+the brief explicitly asks for; it is the standard mitigation for cascade gaming, where
+input is crafted to look easy to the cheap tier; and the disagreements it surfaces are
+exactly the labelled data the router improves on.
+
+---
+
+### Page 3 — The prototype, and what it measured
+
+> **Working end to end, on a real policy document, with the numbers published — including the ones that missed.**
+
+**Built.** An OpenAI-compatible proxy; governance-tagged retrieval; the three tiers; six
+actions including live repair; the policy layer with three profiles; a hash-chained audit
+log; a member-facing frontend and an operator backend; audit sampling with a measured
+false-negative estimate; and an evaluation harness over a hand-built 40-question answer
+key in four classes.
+
+### Targets against measurements
+
+| Metric | Round 1 target | Measured | Reading |
+|---|---|---|---|
+| Wrong answers released, no checking | — | **80%** | The problem, sized |
+| Wrong answers released, full checking | — | **20%** | What the layer is worth |
+| False positives at the shipped `support` threshold | — | **26%** | The cost of that, honestly |
+| Verification share of traffic | 12% | **100%** at Tier 1 | The target was wrong; CPU detection is nearly free |
+| Escalation share — the resource that is actually scarce | — | **13%** | Under the old 12% budget's intent |
+| Cost overhead, Tier 0 + Tier 1 | ~3% | **6.7%** | Right order of magnitude; nobody re-plans a budget around it |
+| Cost overhead, judging every response | ~3% | **113%** | Why the router exists |
+| Added latency, p95 | < 150 ms | **837 ms** | **Missed by ~5x.** Reported as measured, not tuned toward the slide |
+
+**On the latency miss.** Tier 1 is a T5-base encoder running on CPU in float32, scoring
+four spans per request. The target assumed the check was cheaper than it is. Honest
+remedies exist — ONNX or int8 quantisation, batching across concurrent requests, scoring
+the top two spans only, a GPU — and none were attempted here. Publishing the number and
+naming the fixes is worth more than a tuned figure a reviewer cannot reproduce.
+
+**On the evidence's limits.** Forty questions, one corpus, one run. Rates over four or five
+wrong answers are not stable estimates, and every rate in [`RESULTS.md`](RESULTS.md) is
+printed with its count beside it. An ablation isolating what each check contributes reached
+a *different* conclusion on an earlier run of the same set — that is what n=40 buys, and it
+is stated rather than smoothed over.
+
+### What it does not do
+
+Named here rather than left to be discovered: no streaming gate (checks run on the complete
+response); no real-time bias measurement (it needs a paired-prompt set compared across
+runs, and cannot be inferred from one response); no multi-turn or agent-action risk; PII by
+regex rather than full entity detection; no detector trained or retrained; no auth,
+multi-tenancy or horizontal scale.
+
+---
+
+### Page 4 — Target users, and the business case
+
+> **This is not a cost-cutting product. It is what gets AI out of pilot.**
+
+### Who buys it, and who uses it
+
+| | Role | What they need from it |
+|---|---|---|
+| **Buyer** | The risk committee — CRO, Head of Compliance, model-risk function | An auditable record of what was said, what was checked, and what was overridden. This is the group most enterprise AI actually stalls in front of. |
+| **User** | AI platform / MLOps team | One place to set policy per route and see what it costs, instead of a guardrail library per application |
+| **User** | Compliance and quality reviewers | A queue of held responses, and a verdict that visibly moves the threshold |
+| **User** | Support or knowledge operations lead | Which users and which routes generate the risk, and what the review backlog looks like |
+| **Beneficiary** | The end customer | Never sees the machinery — only a corrected answer, an honest "not covered", or a visible advisory |
+
+### Unit economics, from the simulated enterprise week
+
+One week at the brief's reference scale — 40,216 interactions, 253 users, three use cases.
+The arrival pattern is simulated; every routing decision is real, produced by the shipped
+router over signals measured in the evaluation run.
+
+| | Measured over the week |
+|---|---|
+| Model spend | **$7.13** |
+| Checking spend | **$2.34** (24.7% overhead at this profile mix, which judges heavily) |
+| Responses acted on | **11,331** (28.2%) |
+| Responses escalated to repair or a human | **5,226** (13.0%) |
+| Responses that correctly declined | **15,111** (37.6%) |
+| Added latency | p50 **539 ms**, p95 **2,299 ms** |
+
+Costs are at small-instruct-model rates (`$0.20/$0.60` per 1M tokens; the provider
+publishes none that LiteLLM knows, so spend is estimated from token counts and labelled
+`estimated` on every response). The transferable figure is not the dollar amount but the
+**ratio**: cheap detection on everything is a rounding error; a second opinion is not, and
+has to be aimed.
+
+**The honest number on this page is 5,226.** Thirteen percent escalation at 40k
+interactions a week is a real operational load, and a buyer should see it before signing
+rather than after. It is also precisely why the tuning dial is the product surface: that
+number is a policy choice, and the console shows what moving it costs in missed errors.
+
+### Why it matters
+
+| | | |
+|---|---|---|
+| **1 · Deploy** | Most enterprise AI stalls in risk review, not development | An auditable record of what was said, checked and overridden is what clears it |
+| **2 · Detect** | Providers update models underneath you; a prompt that worked last month degrades quietly | Continuous checking is the only way to see it happen — measured here across two models with the checker unchanged |
+| **3 · Investigate** | When something goes wrong you need to know how many other customers got the same wrong answer, within hours | Per-response logging, hash-chained so the log can be shown not to have been edited. EU AI Act Article 12 record-keeping is enforceable from 2 August 2026 |
+| **4 · Optimise** | It does not cut spend directly | It produces the evidence that makes downgrading to a smaller model *safe* — and fewer wrong answers means fewer re-asks. The 88%-vs-62% comparison is that argument as a measurement |
+
+**Where the moat is, stated plainly.** Every individual component ships elsewhere — a
+63-source prior-art scan is published in this repo. Detection is commoditised. What
+nothing in that scan does is join the **cost axis to the risk decision**, expose the
+**tuning tradeoff as the product surface** rather than hiding a chosen threshold, or treat
+**data provenance as a first-class check**. Composing mature detectors and spending the
+engineering on the router is the choice a competent staff engineer makes, and saying so
+out loud reads as judgement rather than as a shortcut.
+
+---
+
+### Page 5 — Roadmap, and the risks that could sink it
+
+### Phased roadmap
+
+| Horizon | Work | Done when |
+|---|---|---|
+| **Now** — shipped | Proxy, three tiers, six actions, policy layer, hash-chained audit, member frontend and operator backend, feedback loop, evaluation harness | ✅ This repository |
+| **H1** — make the numbers defensible | Widen the answer key past 40 questions and add HaluBench for a scale run; quantise Tier 1 to ONNX/int8 and batch it to close the latency gap; swap regex PII for full entity detection | The p95 latency target is met or formally revised, and rates rest on hundreds of labels rather than forty |
+| **H2** — close the stated gaps | Stream-gated checking so high-stakes routes hard-gate and the rest release-and-correct; offline paired-prompt bias job as a batch Tier 2; geographic policy profiles | The three "does not do" items with a real design behind them are built |
+| **H3** — make it an enterprise product | Multi-tenancy and auth; Postgres; horizontal scale; multi-turn and agent-action risk compounding; connectors for the common enterprise RAG stacks | It survives a second customer without a fork |
+| **H4** — the compounding asset | Reviewer verdicts and audit-sampled disagreements as a training set for a tuned detector; per-deployment threshold learning | The loop improves detection quality, rather than only recommending a threshold |
+
+The order is deliberate. **H1 comes before H2** because a prototype whose numbers are not
+defensible cannot argue for anything, and the measurement *is* the contribution.
+
+### Key risks and mitigations
+
+| Risk | Why it is real | Mitigation |
+|---|---|---|
+| **"Why not just use Portkey + Guardrails AI + Langfuse?"** | Those exist, are mature, and cover most of the surface | They compose into a system that checks everything the same way and reports cost separately from risk — too slow for the customer-facing route, too shallow for the regulated one, with no single place a risk owner sets one policy and gets one evidence trail. The demo shows that gap rather than asserting it. |
+| **The architecture is already published** | [arXiv 2510.19877](https://arxiv.org/pdf/2510.19877) independently specifies a cheap→small→heavy cascade with per-route latency budgets | Cite it prominently and first. This work is an implementation and empirical evaluation of that idea, not a claim to have invented it. Claiming novelty a judge can disprove in one search is the worst available outcome. |
+| **Cascade gaming** | Input can be crafted to look easy to the cheap tier ([arXiv 2605.17288](https://arxiv.org/html/2605.17288v1)) | Random audit sampling of passed traffic — already built, and it is the same mechanism that produces the false-negative estimate |
+| **Alert fatigue and bypass** | 26% false positives at the shipped threshold is high enough for users to route around the system | The dial is the product surface, and the feedback loop moves it from reviewer verdicts. The failure mode is named on the tuning page rather than hidden |
+| **Escalation load exceeds review capacity** | 13% of 40k/week is 5,226 responses | Escalation rate is a first-class dashboard metric with a live queue depth, so the policy is tuned against staffing rather than discovered by a backlog |
+| **The latency budget is missed by 5x** | Measured 837 ms p95 against a 150 ms target | Published, not hidden, with four named remedies as H1 work. A target that moves is survivable; a target quietly restated is not |
+| **No log-probabilities from some providers** | Anthropic exposes none, and two models behind the *same* OpenRouter account differed | Capability is detected per call, Tier 0 degrades to its remaining signals, and the router escalates rather than assuming confidence. Which mode a response ran in is recorded and shown |
+| **Groundedness cannot see a stale source** | An answer can be perfectly faithful to a document that should not have been trusted | The governance tier acts on *where* support came from. Measured: 4 of 40 answers rested only on an unowned source, 2 of them wrong |
+| **The evidence base is 40 questions** | An ablation flipped its conclusion between two runs of the same set | Every rate is published with its count; the limitation is stated on the results page; widening the set is H1's first item |
+| **Scope creep back toward building detectors** | The tempting, losing move | The out-of-scope list in this README is the contract. The contribution is the router and the measurement around it |
 
 ---
 
@@ -82,8 +367,8 @@ built, the file it is in, and what is deliberately not built.
 
 `decide()` is a **pure function**. That is load-bearing: it is what lets the tuning
 console replay real decisions at any threshold, the eval sweep re-score a run, and the
-chat page show "what this same answer would have done under another profile" — all
-without paying a model again.
+decision inspector show "what this same answer would have done under another profile" —
+all without paying a model again.
 
 ### 3. Architecture
 
@@ -97,7 +382,7 @@ without paying a model again.
 
 | | Where |
 |---|---|
-| Configurable policy layer | [`policies.toml`](policies.toml) — three profiles, twelve knobs each. **Nothing in `controlplane/` branches on a use-case name**; the three behaviours come from this file alone. |
+| Configurable policy layer | [`policies.toml`](policies.toml) — three profiles, thirteen knobs each. **Nothing in `controlplane/` branches on a use-case name**; the three behaviours come from this file alone. |
 | Varying by risk appetite | `support` redacts PII and hedges; `copilot` only flags; `decision_support` blocks, never repairs, and judges everything |
 | Audit trail | [`audit.py`](controlplane/audit.py) — one row per response with every signal, plus a **SHA-256 hash chain** so the log can be shown not to have been edited after the fact (`verify_chain`). The dashboard shows it verifying live. |
 | Data governance | Corpus split into `corpus/governed/` and `corpus/ungoverned/`, with the tier carried on every chunk and acted on by `ungoverned_action` |
@@ -308,6 +593,11 @@ Named here rather than left for a reader to discover.
 - **No real-time bias measurement.** Bias needs a paired-prompt set compared across runs.
   It cannot be inferred from a single response and is not attempted inline. Naming it as
   roadmap is more honest than a plausible-looking inline check.
+- **Cost is observed, never acted on.** Spend is measured per response, joined to the
+  decision record and reported everywhere — but nothing in `decide()` reads it. There is
+  no budget cap, no spend-triggered model downgrade and no cost knob in `policies.toml`.
+  Of the three risks the pitch names, *quietly expensive* is the one this prototype makes
+  visible rather than controllable.
 - **No multi-turn or agent-action risk.** This checks single responses; the brief's
   compounding-risk-across-turns concern is real and unaddressed.
 - **PII detection is regex, not Presidio.** Adequate for the identifier classes in this
@@ -344,7 +634,7 @@ Named here rather than left for a reader to discover.
                     │                     audit log (hash-chained)                 │
                     └──────────────────────────────┬───────────────────────────────┘
                                                    │
-                              chat inspector · dashboard · tuning dial · feedback loop
+         frontend/  member app  │  console/  operations · tuning dial · policy · feedback loop
 ```
 
 More detail, including the data model, in [`docs/architecture.md`](docs/architecture.md).
@@ -358,7 +648,8 @@ More detail, including the data model, in [`docs/architecture.md`](docs/architec
 | Grounding | **Vectara HHEM-2.1-Open** | 110M, CPU, Apache-2.0 — the licence matters for a public repo |
 | Retrieval | sentence-transformers MiniLM + brute-force cosine | One document and a few hundred chunks. A vector DB would be more moving parts than data. |
 | Store | SQLite | 40k rows a week is nothing. Postgres would be unjustifiable. |
-| Console | One CSS file, one JS file, three HTML pages | No build step, no framework, no charting library — the SVG is hand-written |
+| Frontend | One HTML page, its own CSS and JS | The member app. No framework, no build step, and no dependency on the console's design system — the separation is structural, not a convention |
+| Backend console | One CSS file, one JS file, three HTML pages (operations · tuning · policy) | No build step, no framework, no charting library — the SVG is hand-written |
 
 ### Provider support
 

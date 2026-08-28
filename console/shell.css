@@ -164,7 +164,7 @@ svg{display:block}
   display:flex;align-items:flex-start;justify-content:center;padding:5vh 20px;
   overflow-y:auto}
 .modal-card{background:var(--surface-1);border:1px solid var(--line-strong);
-  border-radius:12px;box-shadow:var(--shadow);max-width:840px;width:100%;
+  border-radius:12px;box-shadow:var(--shadow);max-width:1080px;width:100%;
   padding:22px 24px}
 .modal-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .modal-head h2{flex:1}
@@ -174,3 +174,39 @@ svg{display:block}
   .brand small{display:none}
   .wrap{padding:18px 14px 60px}
 }
+
+/* --- decision inspector ------------------------------------------------------
+   Used by the dashboard's detail view. These classes came from the old chat page
+   when the inspector moved to the operator surface, where it belongs. */
+nav a.outlink{color:var(--text-muted);margin-left:8px}
+nav a.outlink:hover{color:var(--accent);background:transparent}
+
+.insp h3{margin-top:18px;display:flex;align-items:center;gap:8px}
+.insp h3:first-child{margin-top:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:.83rem;
+  align-items:baseline}
+.kv dt{color:var(--text-muted)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:9px;
+  padding:11px 13px;margin-bottom:9px}
+.span-row{display:flex;align-items:center;gap:9px;font-size:.79rem;margin-bottom:7px}
+.span-row .meter{flex:1}
+.span-row .sc{font-variant-numeric:tabular-nums;min-width:34px;text-align:right;
+  color:var(--text-secondary)}
+.quote{font-size:.8rem;color:var(--text-secondary);border-left:2px solid var(--line-strong);
+  padding-left:9px;margin-top:7px;white-space:pre-wrap;max-height:120px;overflow-y:auto}
+.sig{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;
+  padding:5px 0;border-bottom:1px solid var(--line)}
+.sig:last-child{border-bottom:0}
+.sig b{font-weight:600;font-variant-numeric:tabular-nums}
+.budget{display:flex;align-items:center;gap:8px;font-size:.78rem;margin-top:7px}
+.replay-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.replay-out{font-size:.8rem;margin-top:9px;color:var(--text-secondary)}
+.fb{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+
+/* The detail view is two columns on a wide screen: the record on the left,
+   the tier-by-tier evidence on the right. */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:20px;
+  align-items:start}
+@media (max-width:900px){.detail{grid-template-columns:1fr}}
+.controls .grow{flex:1;min-width:180px}

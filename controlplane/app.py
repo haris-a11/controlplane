@@ -1,10 +1,12 @@
-"""OpenAI-compatible proxy, plus the APIs the three console pages read.
+"""OpenAI-compatible proxy, plus the APIs behind the member app and the console.
 
 Solutioning area: **architecture** — "where the checker sits in the pipeline, and
 how checks can run in parallel to protect latency". It sits here, as inline
 middleware: any app already speaking the OpenAI protocol is pointed at this URL
 and gets checked without knowing it. That demonstrates model-agnosticism instead
-of claiming it.
+of claiming it — and it is why the member app under `frontend/` is a plain chat
+client with no knowledge of any of this, while the operator console under
+`console/` reads the decision record the same proxy wrote.
 
 Tier 0 and Tier 1 both need the finished answer and neither needs the other, so
 they are gathered rather than sequenced. Every response records `check_ms` (wall
@@ -32,7 +34,8 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import audit, checks, judge, learning, llm, rag, router
@@ -43,7 +46,15 @@ GROUNDING_PROMPT = llm.GROUNDING_PROMPT
 _complete = llm.complete
 _logprob_stats = llm.logprob_stats
 
-CONSOLE = Path(__file__).resolve().parent.parent / "console"
+ROOT = Path(__file__).resolve().parent.parent
+# Two separate surfaces, deliberately. `frontend/` is the member-facing app — what
+# an end user of the governed application sees. `console/` is the operator backend
+# — dashboard, tuning dial and policy view. They share no stylesheet and no
+# helper: a customer never sees a grounding score, and an operator never has to
+# guess what the customer saw. Keeping them apart makes that structural rather
+# than a matter of remembering which page is which.
+FRONTEND = ROOT / "frontend"
+CONSOLE = ROOT / "console"
 
 # A rough CPU cost for the local checkers, so overhead-% is derivable rather than
 # left blank. Assumes ~$0.05/hour for a small always-on instance; the Tier 1
@@ -385,37 +396,95 @@ def api_score(use_case: str = "support", block: float = 0.35, annotate: float = 
     return s
 
 
-# --- the three pages ----------------------------------------------------------
+# --- simulated load -----------------------------------------------------------
 
-def _page(name):
-    return FileResponse(CONSOLE / name)
-
-
-@app.get("/")
-def root():
-    return _page("chat.html")
+class Simulate(BaseModel):
+    n: int = 40_000
 
 
-@app.get("/chat")
-def chat_page():
-    return _page("chat.html")
+@app.post("/api/simulate")
+async def api_simulate(req: Simulate):
+    """Generate an enterprise week of traffic from the console.
+
+    The brief's reference parameters assume tens of thousands of interactions a
+    week. Making that many real model calls would cost money and hours and
+    demonstrate nothing one call does not, so the arrival pattern is invented and
+    every row is marked `simulated`. The *decisions* are real: each row is routed
+    by the same `decide()` the live path uses, over signals measured in
+    eval/results.json. See demo/simulate_week.py.
+
+    Imported lazily for the same reason eval.run_eval is: `controlplane/` is the
+    product and must not depend on the demo harness at import time.
+    """
+    if not 1 <= req.n <= 200_000:
+        raise HTTPException(400, "n must be between 1 and 200,000")
+    from demo.simulate_week import simulate
+    written = await asyncio.to_thread(simulate, req.n)
+    agg = audit.aggregate()
+    return {"written": written, "total_rows": agg["n"],
+            "message": f"Wrote {written:,} simulated rows — {agg['n']:,} in the log, "
+                       f"{agg['flag_rate']:.1%} flagged, "
+                       f"{agg['escalation_rate']:.1%} escalated."}
 
 
-@app.get("/dashboard")
-def dashboard_page():
-    return _page("dashboard.html")
+@app.post("/api/simulate/reset")
+async def api_simulate_reset():
+    """Drop simulated rows, keeping live traffic.
+
+    This breaks the hash chain, by design and visibly: a log you can silently
+    delete rows from is not an evidence trail. The console says so before asking.
+    """
+    import sqlite3
+    def _drop():
+        with sqlite3.connect(audit.DB) as c:
+            n = c.execute(
+                "SELECT COUNT(*) FROM decisions WHERE simulated=1").fetchone()[0]
+            c.execute("DELETE FROM decisions WHERE simulated=1")
+        return n
+    removed = await asyncio.to_thread(_drop)
+    ok, rows, bad = audit.verify_chain()
+    return {"removed": removed,
+            "message": f"Removed {removed:,} simulated rows. Chain over the "
+                       f"remaining {rows:,} rows is "
+                       + ("intact." if ok else f"broken at row #{bad} — deleting rows "
+                                               "breaks it by design.")}
 
 
-@app.get("/console")
-def console():
-    return _page("index.html")
+# --- the two surfaces ---------------------------------------------------------
+# Assets are mounted rather than routed one file at a time, so adding a stylesheet
+# to either surface needs no change here.
+
+app.mount("/static/member", StaticFiles(directory=FRONTEND), name="member-assets")
+app.mount("/static/console", StaticFiles(directory=CONSOLE), name="console-assets")
 
 
-@app.get("/shell.css")
-def shell_css():
-    return FileResponse(CONSOLE / "shell.css", media_type="text/css")
+@app.get("/", include_in_schema=False)
+def member_app():
+    """The frontend: Meridian's member support chat. What an end user sees."""
+    return FileResponse(FRONTEND / "index.html")
 
 
-@app.get("/shell.js")
-def shell_js():
-    return FileResponse(CONSOLE / "shell.js", media_type="text/javascript")
+@app.get("/console", include_in_schema=False)
+def console_operations():
+    """The backend: every response, who it was for, what was decided, what it cost."""
+    return FileResponse(CONSOLE / "dashboard.html")
+
+
+@app.get("/console/tuning", include_in_schema=False)
+def console_tuning():
+    """The false-positive / false-negative dial."""
+    return FileResponse(CONSOLE / "tuning.html")
+
+
+@app.get("/console/policy", include_in_schema=False)
+def console_policy():
+    """The policy layer, and the audit trail behind it."""
+    return FileResponse(CONSOLE / "policy.html")
+
+
+# The console was one page set before the surfaces were split. Old links redirect
+# rather than 404 — the demo video and the README both name these paths.
+for _old, _new in (("/chat", "/"), ("/dashboard", "/console")):
+    app.add_api_route(
+        _old, (lambda t=_new: (lambda: RedirectResponse(t, status_code=308)))(),
+        include_in_schema=False)

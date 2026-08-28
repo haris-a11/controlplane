@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian Health Assurance — Member Support</title>
+<link rel="stylesheet" href="/static/member/member.css">
+
+<header>
+  <div class="logo"><span class="mark">M</span>Meridian Health Assurance
+    <em>Member Support</em></div>
+  <div class="spacer"></div>
+  <a class="opslink" href="/console" title="The governance console the operator sees">
+    Operations console →</a>
+</header>
+
+<main>
+  <div class="welcome" id="welcome">
+    <h1>How can we help with your policy?</h1>
+    <p>Ask about waiting periods, room rent limits, exclusions or claims. Answers
+      are drawn from your policy document.</p>
+  </div>
+
+  <div class="thread" id="thread"></div>
+
+  <div class="suggest" id="suggest"></div>
+  <div class="ask">
+    <textarea id="q" rows="1" placeholder="Ask about your policy…"
+      aria-label="Ask about your policy"></textarea>
+    <button id="send">Send</button>
+  </div>
+</main>
+
+<footer>
+  Meridian Health Assurance is a fictional insurer. Answers come from an
+  illustrative policy document and are not financial or medical advice.
+</footer>
+
+<div class="demobar">
+  <div class="in">
+    <b>Demo controls</b>
+    <span>Deployment
+      <select id="uc" title="A real deployment fixes this in config. Exposed here so one instance can demonstrate all three profiles.">
+        <option value="support">Customer support — customer-facing</option>
+        <option value="copilot">Internal copilot — staff-facing</option>
+        <option value="decision_support">Decision support — regulated</option>
+      </select></span>
+    <span>Member <input type="text" id="user" value="u_demo" size="9"></span>
+    <span class="spacer"></span>
+    <a href="/console">See what the checking layer decided →</a>
+  </div>
+</div>
+
+<script src="/static/member/member.js"></script>
+</html>

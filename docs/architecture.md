@@ -145,7 +145,7 @@ what a confident hallucination *is*.
 `router.decide(signals, grounding, policy, verdict, stale_sources) -> (action, reason)`
 
 **Pure.** No I/O, no clock, no randomness. That is what lets the tuning console replay
-real decisions at any threshold, the eval sweep re-score a stored run, and the chat page
+real decisions at any threshold, the eval sweep re-score a stored run, and the console
 show what the same answer would do under another profile — none of which costs a model
 call. Do not reach into I/O from it.
 
@@ -267,7 +267,35 @@ and an easy one to catch.
 
 ---
 
-## 9. The console
+## 9. The two surfaces
+
+The frontend is what an **end user** sees; the console is what an **operator** sees. They
+are separate directories serving separate origins of truth, and they share no stylesheet
+and no helper. That is not tidiness — it is the security property. A customer is not an
+auditor, and a page that renders a grounding score cannot leak one to a customer if it is
+not the page the customer is served.
+
+### `frontend/` — the member app
+
+One HTML page with its own CSS and JS. It speaks the OpenAI chat protocol and nothing
+else; it has no knowledge of tiers, thresholds or policy. The response carries a full
+`controlplane` block and the page renders **none** of it. What a member sees is the
+*effect* of the decision:
+
+| Action | What the member gets |
+|---|---|
+| `pass` | The answer |
+| `abstain` | The answer — an honest "your policy does not cover this" |
+| `annotate` | The answer, plus the advisory the router attached, as a callout rather than as more prose |
+| `redact` | The answer with identifiers removed, and a note saying that happened |
+| `repair` | The corrected answer. The wrong one never reached them |
+| `block` | A held-for-review message and a case reference |
+
+The demo-controls strip at the foot of that page (deployment profile, member id) is
+scaffolding, fenced off and labelled as such: a real deployment fixes its use case in
+config and would not render it.
+
+### `console/` — the operator backend
 
 Three pages, one CSS file, one JS file, no framework and no build step. The charts are
 hand-written SVG and stacked `<div>`s; a charting library would be a dependency carrying
@@ -275,13 +303,20 @@ two charts.
 
 | Page | Reads | Shows |
 |---|---|---|
-| `/chat` | `POST /v1/chat/completions` | The live request path with a decision inspector: every Tier 0 signal, per-span grounding with governance badges, the judge's verdict, the action and why, latency and cost breakdown, and a replay-under-another-profile control |
-| `/dashboard` | `/api/metrics`, `/api/users`, `/api/traffic`, `/api/queue`, `/api/learning`, SSE `/api/events` | Volume at enterprise scale, per-use-case against each budget, per-user monitoring, live traffic, the full audit record with chain verification, the review queue, and what the loop has learned |
-| `/console` | `/api/sweep`, `/api/score` | The false-positive / false-negative dial, replayed through the real `decide()` |
+| `/console` | `/api/metrics`, `/api/users`, `/api/traffic`, `/api/queue`, `/api/learning`, `/api/decision/{id}`, `/api/replay`, `/api/simulate`, SSE `/api/events` | Volume at enterprise scale, per-use-case against each budget, per-user monitoring, live traffic, the review queue, what the loop has learned, and a control to generate simulated load. Opening any row gives the **full decision inspector**: every Tier 0 signal, per-span grounding with governance badges, the judge's verdict, latency and cost breakdown, replay under another profile, and a reviewer verdict |
+| `/console/tuning` | `/api/sweep`, `/api/score` | The false-positive / false-negative dial, replayed through the real `decide()` |
+| `/console/policy` | `/api/policies`, `/api/metrics` | Every knob across the three profiles with what each trades away, the audit-chain verification, and what the policy layer deliberately does *not* vary by |
+
+The inspector used to sit beside the chat window. It moved here when the surfaces were
+split: showing a customer the machinery was the wrong default, and forcing an operator to
+open the customer's page to audit a decision was the wrong workflow.
 
 The tuning page reads `eval/results.json` — a labelled set, where false positives and
-negatives are *knowable*. The dashboard reads the audit log — production traffic, where
-they are not, which is why the audit-sample estimate exists.
+negatives are *knowable*. The operations page reads the audit log — production traffic,
+where they are not, which is why the audit-sample estimate exists.
+
+`/chat` and `/dashboard` are kept as 308 redirects to `/` and `/console`; earlier
+write-ups name those paths.
 
 `/api/events` polls the log's high-water mark on a 1.5 s loop rather than using a message
 bus. At tens of thousands of rows a week a bus would be infrastructure with nothing to

@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ControlPlane — operations</title>
-<link rel="stylesheet" href="/shell.css">
+<link rel="stylesheet" href="/static/console/shell.css">
 <style>
 .head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .head .grow{flex:1}
@@ -64,11 +64,13 @@
 </div>
 <div id="modal"></div>
 
-<script src="/shell.js"></script>
+<script src="/static/console/shell.js"></script>
 <script>
-$("#bar").innerHTML = topbar("/dashboard");
+$("#bar").innerHTML = topbar("/console");
 
 let state = { user: null, use_case: null, action: null, metrics: null };
+let POLICIES = {};
+api("/api/policies").then(p => { POLICIES = p; });
 const win = () => +$("#win").value;
 const liveOnly = () => $("#src").value === "live";
 const since = () => win() ? (Date.now() / 1000 - win()) : null;
@@ -230,7 +232,9 @@ function renderBody(m, users, rows, learn, queue) {
 
       ${learningPanel(learn)}
     </div>
-  </div>`;
+  </div>
+
+  ${simulationPanel(m)}`;
 
   $$("[data-uc]").forEach(c => c.onclick = () => {
     state.use_case = state.use_case === c.dataset.uc ? null : c.dataset.uc; load();
@@ -245,6 +249,7 @@ function renderBody(m, users, rows, learn, queue) {
   $$("[data-user]").forEach(r => r.onclick = () => { state.user = r.dataset.user; load(); });
   $$("[data-open]").forEach(r => r.onclick = () => openDecision(+r.dataset.open));
   wireQueue();
+  wireSimulation();
 }
 
 function trafficRow(r) {
@@ -347,11 +352,82 @@ function volumeChart(series) {
     <span>${when(series[0].t)}</span><span>${when(series[series.length - 1].t)}</span></div>`;
 }
 
-/* --- decision detail -------------------------------------------------------- */
+/* --- simulated load ----------------------------------------------------------
+   The brief's reference parameters assume tens of thousands of interactions a
+   week across several use cases. Making that many real model calls would cost
+   money and hours and demonstrate nothing a single call does not, so the volume
+   is generated here — and every row it writes is marked `simulated`, in the
+   database, in the API and with a badge in the table above.
+
+   What is invented is only the arrival pattern: who asked, when, under which
+   profile. The decisions are real — each row is produced by calling the same
+   router over signals and grounding scores measured in eval/results.json. */
+function simulationPanel(m) {
+  const t = m.totals;
+  return `<div class="panel">
+    <h2>Simulated load</h2>
+    <p class="hint">Generate an enterprise week so the dashboard sits at the scale the
+      brief assumes. The arrival pattern is invented; the decisions are not — every
+      row is routed by the real <code>decide()</code> over signals measured in
+      <code>eval/results.json</code>. Rows are marked <span class="badge sim">simulated</span>
+      everywhere they appear, and the <em>Traffic</em> selector above filters them out.</p>
+    <div class="controls" style="margin-top:0">
+      <div><label for="simn">Interactions</label>
+        <select id="simn">
+          <option value="40000">40,000 — one enterprise week</option>
+          <option value="10000">10,000</option>
+          <option value="2000">2,000 — quick</option>
+        </select></div>
+      <div><button class="primary" id="simrun">Generate</button></div>
+      <div><button id="simreset">Remove simulated rows</button></div>
+      <div class="grow" id="simout" style="font-size:.82rem;color:var(--text-secondary)"></div>
+    </div>
+    <p class="hint" style="margin:12px 0 0">Currently <b>${num(t.n)}</b> rows in the log,
+      hash-chained. Deleting simulated rows breaks the chain by design — that is what
+      having one is for. Re-seed from an empty database for a clean chain.</p>
+  </div>`;
+}
+
+function wireSimulation() {
+  const out = $("#simout");
+  const run = async (path, body, label) => {
+    $("#simrun").disabled = $("#simreset").disabled = true;
+    out.textContent = `${label}…`;
+    try {
+      const r = await api(path, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      out.textContent = r.message;
+      load();
+    } catch (e) {
+      out.textContent = `Failed: ${e.message}`;
+    } finally {
+      $("#simrun").disabled = $("#simreset").disabled = false;
+    }
+  };
+  $("#simrun").onclick = () =>
+    run("/api/simulate", { n: +$("#simn").value }, "Generating traffic");
+  $("#simreset").onclick = () => {
+    if (confirm("Remove all simulated rows? This breaks the hash chain by design."))
+      run("/api/simulate/reset", {}, "Removing simulated rows");
+  };
+}
+
+/* --- decision detail --------------------------------------------------------
+   The full inspector. This is the operator's view of one response: the record on
+   the left, every signal the tiers produced on the right, and the two controls a
+   reviewer actually needs — replay under another profile, and a verdict.
+
+   All of this used to sit beside the chat window. It moved here when the member
+   app was split off: a customer is not an auditor, and an auditor should not have
+   to reconstruct what a customer saw. */
 async function openDecision(id) {
   const d = await api(`/api/decision/${id}`);
+  const cp = normalizeDecision(d);
+  const pol = POLICIES[d.use_case] || {};
   const r = d.record || {};
-  const g = (r.grounding || {}).grounding;
+
   $("#modal").innerHTML = `<div class="modal">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-head">
@@ -359,40 +435,91 @@ async function openDecision(id) {
         ${actionPill(d.decision)} ${tierPath(d.tier_path)}
         <span class="badge ${d.chain_ok ? "ok" : "warn"}">
           ${d.chain_ok ? "chain verified" : "chain broken"}</span>
+        ${d.simulated ? '<span class="badge sim">simulated</span>' : ""}
         <button class="sm" id="closem">Close</button>
       </div>
-      <dl class="kv" style="margin-bottom:14px">
-        <dt>When</dt><dd>${when(d.ts)}</dd>
-        <dt>User</dt><dd class="mono">${esc(d.user_id || "anon")}</dd>
-        <dt>Use case</dt><dd>${esc(d.use_case)}</dd>
-        <dt>Reason</dt><dd class="mono">${esc(r.reason || "")}</dd>
-        <dt>Grounding</dt><dd>${g == null ? "not checked" : g.toFixed(3)}
-          <span class="muted">(Tier 1: ${esc(r.tier1_reason || "—")})</span></dd>
-        <dt>Judge</dt><dd>${r.judge_ran
-          ? `${esc((r.judge || {}).verdict || "unavailable")} —
-             ${esc((r.judge || {}).reason || "")}`
-          : `not run <span class="muted">(${esc(r.judge_reason || "—")})</span>`}</dd>
-        <dt>Sources</dt><dd>${(r.sources || []).map(s =>
-          `${govBadge(s.governance)} <span class="mono" style="font-size:.76rem">${esc(s.source)}</span>`
-          ).join("<br>") || "—"}</dd>
-        <dt>Latency</dt><dd>${ms(d.latency_ms)}
-          <span class="muted">(generate ${ms(r.generated_ms)} · check ${ms(d.check_ms)}${
-            r.sequential_ms ? `, ${ms(r.sequential_ms)} if serial` : ""})</span></dd>
-        <dt>Cost</dt><dd>${usd(d.cost_usd)} model + ${usd(d.check_cost_usd)} checking</dd>
-        <dt>Row hash</dt><dd class="mono" style="font-size:.72rem;overflow-wrap:anywhere">
-          ${esc((d.row_hash || "").slice(0, 32))}…</dd>
-      </dl>
-      <h3>Question</h3>
-      <div class="rec">${esc(r.question || "")}</div>
-      <h3 style="margin-top:12px">Released answer</h3>
-      <div class="rec">${esc(r.answer || "")}</div>
-      ${r.original_answer ? `<h3 style="margin-top:12px">Before the checker acted</h3>
-        <div class="rec">${esc(r.original_answer)}</div>` : ""}
-      <h3 style="margin-top:12px">Full record</h3>
-      <div class="rec">${esc(JSON.stringify(r, null, 1))}</div>
+
+      <div class="detail">
+        <div>
+          <dl class="kv" style="margin-bottom:14px">
+            <dt>When</dt><dd>${when(d.ts)}</dd>
+            <dt>User</dt><dd class="mono">${esc(d.user_id || "anon")}</dd>
+            <dt>Use case</dt><dd>${esc(d.use_case)}</dd>
+            <dt>Reason</dt><dd class="mono">${esc(r.reason || "")}</dd>
+            <dt>Row hash</dt><dd class="mono" style="font-size:.72rem;overflow-wrap:anywhere">
+              ${esc((d.row_hash || "").slice(0, 32))}…</dd>
+          </dl>
+
+          <h3>Question</h3>
+          <div class="rec">${esc(r.question || "")}</div>
+
+          <h3 style="margin-top:12px">What the member was shown</h3>
+          <div class="rec">${esc(r.answer || "")}</div>
+
+          ${r.original_answer ? `<h3 style="margin-top:12px">Before the checker acted</h3>
+            <div class="rec">${esc(r.original_answer)}</div>
+            <p class="hint" style="margin-top:6px">The member never saw this version.</p>`
+            : ""}
+
+          <h3 style="margin-top:14px">Reviewer verdict</h3>
+          <div class="card">
+            <p class="hint" style="margin:0 0 7px">The only ground truth this system
+              ever gets in production. Feeds the threshold recommendation.</p>
+            <div class="fb">
+              <button class="sm" data-fb="agree">👍 Correct call</button>
+              <button class="sm" data-fb="false_positive">👎 Over-flagged</button>
+              <button class="sm" data-fb="false_negative">⚠ Missed an error</button>
+            </div>
+            <div class="replay-out" id="fbout"></div>
+          </div>
+
+          <h3 style="margin-top:14px">Same answer, another profile</h3>
+          <div class="card">
+            <p class="hint" style="margin:0 0 4px">Re-decides this stored response under
+              a different policy. No second model call — <code>decide()</code> is pure,
+              which is what makes one engine produce three behaviours from config alone.</p>
+            <div class="replay-row">
+              ${Object.keys(POLICIES).filter(u => u !== d.use_case).map(u =>
+                `<button class="sm" data-replay="${esc(u)}">${esc(u)}</button>`).join("")}
+            </div>
+            <div class="replay-out" id="replayout"></div>
+          </div>
+
+          <h3 style="margin-top:14px">Full record</h3>
+          <div class="rec">${esc(JSON.stringify(r, null, 1))}</div>
+        </div>
+
+        <div class="insp">${inspectorHTML(cp, pol)}</div>
+      </div>
     </div></div>`;
+
   $("#modal .modal").onclick = close;
   $("#closem").onclick = close;
+
+  $$("[data-replay]").forEach(b => b.onclick = async () => {
+    try {
+      const out = await api(
+        `/api/replay/${d.id}?use_case=${encodeURIComponent(b.dataset.replay)}`,
+        { method: "POST" });
+      $("#replayout").innerHTML = `Under <b>${esc(out.use_case)}</b> this same response
+        would be ${actionPill(out.action)}
+        <span class="mono muted">${esc(out.reason)}</span> — it was
+        ${actionPill(out.was.action)} under <b>${esc(out.was.use_case)}</b>.`;
+    } catch (e) { $("#replayout").textContent = e.message; }
+  });
+
+  $$("[data-fb]").forEach(b => b.onclick = async () => {
+    try {
+      await api("/api/feedback", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ decision_id: d.id, verdict: b.dataset.fb }),
+      });
+      $("#fbout").textContent = "Recorded. It feeds the threshold recommendation below.";
+      $$("[data-fb]").forEach(x => x.disabled = true);
+      load();
+    } catch (e) { $("#fbout").textContent = `Could not record: ${e.message}`; }
+  });
+
   function close() { $("#modal").innerHTML = ""; }
 }
 
@@ -414,7 +541,7 @@ es.onmessage = ev => {
   while (tb.children.length > 150) tb.lastElementChild.remove();
 };
 
-// Deep link from the chat page: /dashboard?decision=123
+// Deep link into one decision: /console?decision=123
 const deep = new URLSearchParams(location.search).get("decision");
 load().then(() => { if (deep) openDecision(+deep); });
 setInterval(() => { if (!$("#modal").innerHTML) load(); }, 20000);

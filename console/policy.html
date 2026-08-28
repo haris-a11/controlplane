@@ -1,0 +1,146 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ControlPlane — policy</title>
+<link rel="stylesheet" href="/static/console/shell.css">
+<style>
+.profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:13px;margin-top:20px}
+.prof{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+  padding:15px 17px}
+.prof h2{font-size:.95rem;margin-bottom:2px}
+.prof .who{font-size:.8rem;color:var(--text-secondary);margin:0 0 11px}
+.prof dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.8rem;
+  margin:0}
+.prof dt{color:var(--text-muted)}
+.prof dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;font-weight:550}
+.matrix td:first-child{white-space:nowrap}
+.matrix .why{color:var(--text-secondary);font-size:.81rem}
+.chain{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.chainbig{font-size:1.5rem;font-weight:650}
+</style>
+<div id="bar"></div>
+<div class="wrap">
+  <h1>Policy</h1>
+  <p class="sub">Thresholds are client-set policy, not product behaviour. Regulation
+  varies by sector and geography, so a single global rule ages badly — every number
+  below is read from <code>policies.toml</code> at request time, and nothing in
+  <code>controlplane/</code> branches on the name of a use case.</p>
+
+  <div id="body"><div class="empty">Loading…</div></div>
+</div>
+
+<script src="/static/console/shell.js"></script>
+<script>
+$("#bar").innerHTML = topbar("/console/policy");
+
+/* Each knob, with what turning it actually trades away. The descriptions live
+   here rather than in policies.toml because this page is where a risk owner reads
+   them, and a comment in a config file is not a control surface. */
+const KNOBS = [
+  ["latency_budget_ms", "Latency budget", "Checking time this route will tolerate. Over-budget responses are flagged in the log, never dropped — a slow check is a reporting problem, not a reason to release unchecked."],
+  ["tier1_always", "Tier 1 on everything", "Grounding is a 110M CPU classifier, so running it on all traffic is affordable. Turning it off trades recall for a few hundred milliseconds."],
+  ["tier0_trigger_logprob", "Tier 0 escalation", "Mean log-probability below this escalates to full verification. Higher is more suspicious."],
+  ["grounding_block", "Block below", "The main dial. Below this the answer is repaired or held. Raising it catches more wrong answers and flags more right ones — there is no setting that does both."],
+  ["grounding_annotate", "Annotate below", "Released with a visible advisory attached. The cheapest intervention available: the member still gets an answer, with a caveat they can see."],
+  ["judge_enabled", "Tier 2 available", "Whether a second opinion may be bought on this route at all."],
+  ["judge_always", "Judge everything", "Pays for a second model call on every response. Measured at 113% cost overhead — affordable only where being wrong costs more than asking twice."],
+  ["judge_band_lo", "Ambiguous band, low", "Grounding range where the score is not evidence either way, so a judge is worth paying for."],
+  ["judge_band_hi", "Ambiguous band, high", "Upper edge of the same band."],
+  ["pii_action", "On a detected identifier", "redact · block · flag. A leak is settled before any judgement about correctness — an answer that abstains and leaks is still a leak."],
+  ["ungoverned_action", "On a loosely governed source", "allow · annotate · block. What to do when the only span supporting an answer came from a source with no owner. Groundedness cannot see this: the answer really is faithful to what it was shown."],
+  ["allow_repair", "May re-issue", "Whether the system may re-ground and re-send, or must hold for a human."],
+  ["audit_sample_rate", "Audit sampling", "Share of Tier-0-passed traffic verified anyway. Without it the false-negative rate is unknowable and a cheap first tier can be gamed by input crafted to look easy."],
+];
+
+const WHO = {
+  support: "Customer-facing chatbot — wrong answers reach customers.",
+  copilot: "Internal knowledge assistant — staff can sanity-check what they read.",
+  decision_support: "Regulated workflow — hard-gates, never releases on doubt.",
+};
+
+const fmt = v => typeof v === "boolean" ? (v ? "yes" : "no")
+  : typeof v === "number" ? v : `<code>${esc(v)}</code>`;
+
+(async function () {
+  try {
+    const [pols, m] = await Promise.all([
+      api("/api/policies"), api("/api/metrics"),
+    ]);
+    const names = Object.keys(pols);
+
+    $("#body").innerHTML = `
+      <div class="profiles">${names.map(n => {
+        const p = pols[n];
+        return `<div class="prof">
+          <h2><code>${esc(n)}</code></h2>
+          <p class="who">${esc(WHO[n] || "")}</p>
+          <dl>
+            <dt>Block below</dt><dd>${p.grounding_block}</dd>
+            <dt>Annotate below</dt><dd>${p.grounding_annotate}</dd>
+            <dt>On a leak</dt><dd>${esc(p.pii_action)}</dd>
+            <dt>On a stale source</dt><dd>${esc(p.ungoverned_action)}</dd>
+            <dt>May re-issue</dt><dd>${p.allow_repair ? "yes" : "no"}</dd>
+            <dt>Latency budget</dt><dd>${p.latency_budget_ms} ms</dd>
+          </dl>
+        </div>`;
+      }).join("")}</div>
+
+      <div class="panel">
+        <h2>Every knob, and what it trades away</h2>
+        <p class="hint">Read live from <code>policies.toml</code>. Changing a number
+        here changes behaviour on the next request with no code change and no
+        redeploy of the checking logic — that is what makes this a policy layer
+        rather than a set of constants.</p>
+        <div class="scroll"><table class="matrix">
+          <thead><tr><th>Knob</th>${names.map(n =>
+            `<th class="num"><code>${esc(n)}</code></th>`).join("")}
+            <th>What it trades away</th></tr></thead>
+          <tbody>${KNOBS.map(([key, label, why]) => `
+            <tr><td><b>${esc(label)}</b><br>
+              <span class="mono muted" style="font-size:.72rem">${esc(key)}</span></td>
+              ${names.map(n => `<td class="num">${fmt(pols[n][key])}</td>`).join("")}
+              <td class="why">${esc(why)}</td></tr>`).join("")}
+          </tbody></table></div>
+      </div>
+
+      <div class="panel">
+        <h2>Audit trail</h2>
+        <p class="hint">One row per response, each row's hash covering the row before
+        it. The claim a risk owner actually cares about is not "we logged it" but
+        "the log you are being shown is the log that was written". EU AI Act
+        Article 12 record-keeping is enforceable from 2 August 2026.</p>
+        <div class="chain">
+          <span class="chainbig" style="color:var(--${m.chain.verified ? "pass" : "block"})">
+            ${m.chain.verified ? "Chain verified" : "CHAIN BROKEN"}</span>
+          <span class="muted">${num(m.chain.rows)} rows recomputed${
+            m.chain.first_bad_id ? ` · first bad row #${m.chain.first_bad_id}` : ""}</span>
+        </div>
+        <p class="hint" style="margin-top:12px">Any edited or deleted row breaks the
+        recomputation and names the first row that fails. Removing simulated traffic
+        from the Operations page breaks it deliberately, which is the demonstration.
+        Every decision record is retrievable by id, and every stored decision can be
+        replayed under a different profile without a second model call.</p>
+      </div>
+
+      <div class="panel">
+        <h2>What this layer does not vary by</h2>
+        <p class="hint">Stated rather than left to be discovered.</p>
+        <ul class="hint" style="margin:0;padding-left:20px">
+          <li><b>Geography.</b> The brief asks for policy that varies by use case,
+            geography <em>or</em> risk appetite. Only use case is modelled here. The
+            mechanism generalises — a profile is just a named table of thresholds, so
+            <code>[support_eu]</code> would work today — but no geographic profile is
+            shipped and none was evaluated, so it is not claimed.</li>
+          <li><b>Per-user or per-tenant overrides.</b> One profile per route. Multi-tenancy
+            is out of scope for this prototype.</li>
+          <li><b>Automatic threshold changes.</b> The feedback loop recommends a
+            threshold from reviewer verdicts; a human applies it by editing
+            <code>policies.toml</code>. Nothing here self-tunes.</li>
+        </ul>
+      </div>`;
+  } catch (e) {
+    $("#body").innerHTML = `<div class="err">${esc(e.message)}</div>`;
+  }
+})();
+</script>

@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ControlPlane — tuning</title>
-<link rel="stylesheet" href="/shell.css">
+<link rel="stylesheet" href="/static/console/shell.css">
 <div id="bar"></div>
 <div class="wrap">
 <h1>Tuning</h1>
@@ -25,9 +25,9 @@ Every point below is replayed through the same <code>decide()</code> the live pa
 
 <div id="body"></div>
 </div>
-<script src="/shell.js"></script>
+<script src="/static/console/shell.js"></script>
 <script>
-$("#bar").innerHTML = topbar("/console");
+$("#bar").innerHTML = topbar("/console/tuning");
 let shipped = null;
 
 async function load() {
