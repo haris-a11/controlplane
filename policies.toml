@@ -68,3 +68,22 @@ pii_action         = "block"
 ungoverned_action  = "block"   # an unowned wiki page is not a basis for a regulated decision
 allow_repair       = false
 audit_sample_rate  = 0.20
+
+[unchecked]                    # DEMO ONLY — the same app with the checking layer off.
+                               # Not a deployment profile: it exists so the video can
+                               # show what ships when nothing is watching, using the
+                               # config layer rather than a hidden code path. Every
+                               # threshold is set so no branch in decide() can fire.
+latency_budget_ms  = 100000    # no budget concept when nothing is being checked
+tier1_always       = false
+tier0_trigger_logprob = -99.0  # never escalate on confidence
+grounding_block    = 0.0       # nothing scores below zero → never repaired
+grounding_annotate = 0.0       # nothing scores below zero → never hedged
+judge_enabled      = false     # returns ("disabled") before any other judge branch
+judge_always       = false
+judge_band_lo      = 0.0
+judge_band_hi      = 0.0
+pii_action         = "flag"    # recorded in the log, answer text untouched
+ungoverned_action  = "allow"
+allow_repair       = false
+audit_sample_rate  = 0.0
