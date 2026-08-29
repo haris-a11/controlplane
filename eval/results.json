@@ -5,14 +5,14 @@
    "question": "How long is the initial waiting period?",
    "expect": "30|thirty",
    "category": "supported",
-   "answer": "The initial waiting period is thirty (30) days from the policy commencement date.",
+   "answer": "The initial waiting period is thirty (30) days from the policy commencement date, except for accidental injury.",
    "correct": true,
-   "grounding": 0.9683067798614502,
+   "grounding": 0.9726382493972778,
    "signals": {
     "retrieval": 0.46724241971969604,
-    "mean_logprob": -0.18989755934508304,
-    "min_logprob": -0.8259401321411133,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -21,18 +21,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.1 establishes the answer",
+    "reason": "GOVERNED extract establishes the answer",
     "ran": true,
-    "cost_usd": 0.0001744,
+    "cost_usd": 0.000173,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 3,
    "span_scores": [
-    0.13595667481422424,
-    0.04399615898728371,
-    0.43487733602523804,
-    0.9683067798614502
+    0.04274451360106468,
+    0.018025971949100494,
+    0.013459770008921623,
+    0.9726382493972778
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -57,30 +57,30 @@
      "score": 0.377
     }
    ],
-   "gen_ms": 1711,
-   "check_ms": 4685,
-   "judge_ms": 1183,
-   "cost_usd": 7.400000000000001e-05,
+   "gen_ms": 3493,
+   "check_ms": 5447,
+   "judge_ms": 1309,
+   "cost_usd": 7.3e-05,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 319,
-    "completion_tokens": 17,
-    "total_tokens": 336
+    "prompt_tokens": 299,
+    "completion_tokens": 22,
+    "total_tokens": 321
    },
-   "judge_cost_usd": 0.0001744,
-   "check_cost_usd": 6.506944444444445e-05
+   "judge_cost_usd": 0.000173,
+   "check_cost_usd": 7.565277777777778e-05
   },
   {
    "question": "If I have an accident in week one, am I covered?",
    "expect": "accident",
    "category": "supported",
-   "answer": "According to the policy extract, there is an initial waiting period of 30 days, but it does not apply to accidental injury. Therefore, if you have an accident in week one, you are covered.",
+   "answer": "According to the policy extract, there is an initial waiting period of 30 days, but it specifically states \"Except for accidental injury\". This means that if you have an accident, you are covered even within the first 30 days.",
    "correct": true,
-   "grounding": 0.9589030146598816,
+   "grounding": 0.8960326910018921,
    "signals": {
     "retrieval": 0.4355400800704956,
-    "mean_logprob": -0.05697385432850306,
-    "min_logprob": -0.9510027170181274,
+    "mean_logprob": -0.08066890901731484,
+    "min_logprob": -0.9743235111236572,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -90,18 +90,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.1 explicitly excludes accidental injury from initial waiting period",
+    "reason": "GOVERNED extract 3.1 explicitly excludes accidental injury from waiting period",
     "ran": true,
-    "cost_usd": 0.0002312,
+    "cost_usd": 0.00023180000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 3,
    "span_scores": [
-    0.28698137402534485,
-    0.02559483051300049,
-    0.04085046425461769,
-    0.9589030146598816
+    0.17646142840385437,
+    0.03171592205762863,
+    0.07306627184152603,
+    0.8960326910018921
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -126,26 +126,26 @@
      "score": 0.345
     }
    ],
-   "gen_ms": 1459,
-   "check_ms": 559,
-   "judge_ms": 1619,
-   "cost_usd": 0.0001376,
+   "gen_ms": 7100,
+   "check_ms": 901,
+   "judge_ms": 1200,
+   "cost_usd": 0.00014120000000000002,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 562,
-    "completion_tokens": 42,
-    "total_tokens": 604
+    "completion_tokens": 48,
+    "total_tokens": 610
    },
-   "judge_cost_usd": 0.0002312,
-   "check_cost_usd": 7.76388888888889e-06
+   "judge_cost_usd": 0.00023180000000000002,
+   "check_cost_usd": 1.251388888888889e-05
   },
   {
    "question": "When can I claim for cataract surgery?",
    "expect": "24|twenty[- ]four",
    "category": "supported",
-   "answer": "According to the policy extracts, there are conflicting answers. \n\nThe Mediclaim FAQ states that there is no waiting period for cataract, and you can claim from day one as long as the initial 30-day period has passed.\n\nHowever, the sample policy (section 3.2) lists cataract as a specified illness with a waiting period of 24 months from the policy commencement date.\n\nSince the FAQ is unofficial and was last edited 14 months ago, while the sample policy is the official document, it's best to rely on the sample policy. Therefore, you can claim for cataract surgery 24 months after the policy commencement date.",
+   "answer": "According to the policy extracts, there are conflicting answers. \n\nThe Mediclaim FAQ states that there is no waiting period for cataract surgery, and you can claim for it from day one, as long as the initial thirty-day period has passed.\n\nHowever, the sample policy (section 3.2) lists cataract as a specified illness with a waiting period of twenty-four (24) months from the policy commencement date.\n\nSince the FAQ is unofficial and was last edited 14 months ago, and the sample policy has a version number (4.2), it is unclear which one is more up-to-date or accurate. Therefore, I would recommend checking with the insurer directly for the most accurate information.",
    "correct": true,
-   "grounding": 0.37485361099243164,
+   "grounding": 0.16558034718036652,
    "signals": {
     "retrieval": 0.5491979122161865,
     "mean_logprob": null,
@@ -157,20 +157,20 @@
     "asserts_premise": false
    },
    "judge": {
-    "verdict": "supported",
+    "verdict": "contradicted",
     "confidence": 1.0,
-    "reason": "GOVERNED extract establishes a 24-month waiting period for cataract surgery",
+    "reason": "GOVERNED extract states a 24-month waiting period for cataract surgery",
     "ran": true,
-    "cost_usd": 0.000241,
+    "cost_usd": 0.0002442,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 1,
    "span_scores": [
-    0.23495186865329742,
-    0.37485361099243164,
-    0.08480272442102432,
-    0.17704591155052185
+    0.15695273876190186,
+    0.16558034718036652,
+    0.03718489408493042,
+    0.07808363437652588
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -195,30 +195,30 @@
      "score": 0.358
     }
    ],
-   "gen_ms": 17729,
-   "check_ms": 969,
-   "judge_ms": 976,
-   "cost_usd": 0.0001808,
+   "gen_ms": 23284,
+   "check_ms": 905,
+   "judge_ms": 955,
+   "cost_usd": 0.00018680000000000001,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 499,
-    "completion_tokens": 135,
-    "total_tokens": 634
+    "completion_tokens": 145,
+    "total_tokens": 644
    },
-   "judge_cost_usd": 0.000241,
-   "check_cost_usd": 1.3458333333333333e-05
+   "judge_cost_usd": 0.0002442,
+   "check_cost_usd": 1.2569444444444446e-05
   },
   {
    "question": "Is a hernia operation covered after 12 months?",
    "expect": "24|twenty[- ]four",
    "category": "supported",
-   "answer": "No, according to the policy extracts, a hernia operation has a waiting period of 24 months from the policy commencement date, as stated in section 3.2 Specified illnesses. This waiting period is not changed by the unofficial wiki FAQ, which only mentions changes to maternity coverage and cataract waiting periods.",
+   "answer": "No, according to the policy extracts, a hernia operation has a waiting period of 24 months from the policy commencement date, as stated in section 3.2 Specified illnesses. This waiting period is not the same as the 12 months mentioned in the unofficial wiki FAQ for maternity coverage.",
    "correct": true,
-   "grounding": 0.1381758600473404,
+   "grounding": 0.24428434669971466,
    "signals": {
     "retrieval": 0.4962487518787384,
-    "mean_logprob": -0.08150341455196364,
-    "min_logprob": -1.330427885055542,
+    "mean_logprob": -0.08131676443092767,
+    "min_logprob": -1.0924451351165771,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -230,16 +230,16 @@
     "confidence": 1.0,
     "reason": "GOVERNED extract 3.2 specifies a 24-month waiting period for hernia operations",
     "ran": true,
-    "cost_usd": 0.0002364,
+    "cost_usd": 0.00023560000000000003,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 2,
    "span_scores": [
-    0.09846556931734085,
-    0.028498226776719093,
-    0.1381758600473404,
-    0.016341032460331917
+    0.08228635042905807,
+    0.04655434191226959,
+    0.24428434669971466,
+    0.02922496385872364
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -264,31 +264,31 @@
      "score": 0.308
     }
    ],
-   "gen_ms": 1541,
-   "check_ms": 683,
-   "judge_ms": 1367,
-   "cost_usd": 0.00015060000000000003,
+   "gen_ms": 2042,
+   "check_ms": 614,
+   "judge_ms": 2828,
+   "cost_usd": 0.00014820000000000002,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 558,
-    "completion_tokens": 65,
-    "total_tokens": 623
+    "completion_tokens": 61,
+    "total_tokens": 619
    },
-   "judge_cost_usd": 0.0002364,
-   "check_cost_usd": 9.486111111111113e-06
+   "judge_cost_usd": 0.00023560000000000003,
+   "check_cost_usd": 8.527777777777779e-06
   },
   {
    "question": "What is the waiting period for kidney stones?",
    "expect": "24|twenty[- ]four",
    "category": "supported",
-   "answer": "The waiting period for kidney stones is 24 months from the policy commencement date, as stated in section 3.2 of the policy.",
+   "answer": "The waiting period for kidney stones is twenty-four (24) months from the policy commencement date, according to section 3.2 of the policy.",
    "correct": true,
-   "grounding": 0.7991130948066711,
+   "grounding": 0.6809912323951721,
    "signals": {
     "retrieval": 0.5345147848129272,
-    "mean_logprob": -0.11174129868110387,
-    "min_logprob": -0.7246477603912354,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -297,18 +297,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract establishes the answer",
+    "reason": "GOVERNED extract explicitly states the waiting period",
     "ran": true,
-    "cost_usd": 0.00019640000000000003,
+    "cost_usd": 0.00019800000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.7991130948066711,
-    0.03700041025876999,
-    0.019169939681887627,
-    0.008464522659778595
+    0.6809912323951721,
+    0.032148171216249466,
+    0.018769698217511177,
+    0.0067543466575443745
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -333,26 +333,26 @@
      "score": 0.239
     }
    ],
-   "gen_ms": 1688,
-   "check_ms": 434,
-   "judge_ms": 1002,
-   "cost_usd": 0.0001034,
+   "gen_ms": 8314,
+   "check_ms": 580,
+   "judge_ms": 1065,
+   "cost_usd": 0.0001006,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 430,
-    "completion_tokens": 29,
-    "total_tokens": 459
+    "prompt_tokens": 410,
+    "completion_tokens": 31,
+    "total_tokens": 441
    },
-   "judge_cost_usd": 0.00019640000000000003,
-   "check_cost_usd": 6.027777777777778e-06
+   "judge_cost_usd": 0.00019800000000000002,
+   "check_cost_usd": 8.055555555555556e-06
   },
   {
    "question": "How long until maternity is covered?",
    "expect": "24|twenty[- ]four",
    "category": "supported",
-   "answer": "According to the extracts, there are conflicting answers. \n\nThe sample policy (3.4 Maternity) states that maternity expenses are payable only after 24 months of continuous coverage. \n\nHowever, the Meridian Ops Wiki \u2014 Mediclaim FAQ (unofficial) states that maternity is covered after 12 months of continuous coverage, and that the older 24-month figure should be ignored. \n\nTherefore, the answer is not clear from the extracts, as there is a contradiction between the official policy and the unofficial wiki.",
+   "answer": "According to the policy extracts, there are two conflicting answers to this question. \n\nThe sample policy (section 3.4) states that maternity expenses are payable only after twenty-four (24) months of continuous coverage. \n\nHowever, the Meridian Ops Wiki \u2014 Mediclaim FAQ (unofficial) states that maternity is covered after twelve (12) months of continuous coverage, and advises to ignore the older twenty-four month figure. \n\nTherefore, the answer to this question is not clear from the policy extracts.",
    "correct": true,
-   "grounding": 0.4912422299385071,
+   "grounding": 0.6730695366859436,
    "signals": {
     "retrieval": 0.7466417551040649,
     "mean_logprob": null,
@@ -366,18 +366,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.4 Maternity establishes the answer",
+    "reason": "GOVERNED extract establishes 24 months waiting period for maternity",
     "ran": true,
-    "cost_usd": 0.00024320000000000003,
+    "cost_usd": 0.0002424,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 1,
    "span_scores": [
-    0.09548536688089371,
-    0.4912422299385071,
-    0.05917416512966156,
-    0.0798666700720787
+    0.05078044906258583,
+    0.6730695366859436,
+    0.024315517395734787,
+    0.01959034614264965
    ],
    "ungoverned_sources": [
     "intranet-wiki-export.txt"
@@ -404,31 +404,31 @@
      "score": 0.375
     }
    ],
-   "gen_ms": 14858,
-   "check_ms": 745,
-   "judge_ms": 2559,
-   "cost_usd": 0.000173,
+   "gen_ms": 24031,
+   "check_ms": 913,
+   "judge_ms": 1187,
+   "cost_usd": 0.00017240000000000002,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 550,
-    "completion_tokens": 105,
-    "total_tokens": 655
+    "completion_tokens": 104,
+    "total_tokens": 654
    },
-   "judge_cost_usd": 0.00024320000000000003,
-   "check_cost_usd": 1.0347222222222223e-05
+   "judge_cost_usd": 0.0002424,
+   "check_cost_usd": 1.2680555555555556e-05
   },
   {
    "question": "How many deliveries does the maternity benefit cover?",
    "expect": "two|2\\b",
    "category": "supported",
-   "answer": "The maternity benefit covers two deliveries per insured person for the lifetime of the policy.",
+   "answer": "The maternity benefit is limited to two deliveries per insured person for the lifetime of the policy.",
    "correct": true,
-   "grounding": 0.9701043963432312,
+   "grounding": 0.9789424538612366,
    "signals": {
     "retrieval": 0.599844217300415,
-    "mean_logprob": -0.09092067668206817,
-    "min_logprob": -0.47408372163772583,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -437,18 +437,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.4 Maternity states the limit",
+    "reason": "GOVERNED extract 3.4 Maternity establishes the answer",
     "ran": true,
-    "cost_usd": 0.00022600000000000002,
+    "cost_usd": 0.00022640000000000003,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.9701043963432312,
-    0.015694675967097282,
-    0.0061759562231600285,
-    0.004153977148234844
+    0.9789424538612366,
+    0.004198765382170677,
+    0.0035460784565657377,
+    0.001579887350089848
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -473,26 +473,26 @@
      "score": 0.297
     }
    ],
-   "gen_ms": 3987,
-   "check_ms": 416,
-   "judge_ms": 1663,
-   "cost_usd": 0.00012460000000000002,
+   "gen_ms": 7890,
+   "check_ms": 561,
+   "judge_ms": 1204,
+   "cost_usd": 0.0001218,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 572,
-    "completion_tokens": 17,
-    "total_tokens": 589
+    "prompt_tokens": 552,
+    "completion_tokens": 19,
+    "total_tokens": 571
    },
-   "judge_cost_usd": 0.00022600000000000002,
-   "check_cost_usd": 5.777777777777778e-06
+   "judge_cost_usd": 0.00022640000000000003,
+   "check_cost_usd": 7.791666666666669e-06
   },
   {
    "question": "How long before a pre-existing condition is covered?",
    "expect": "36|thirty[- ]six",
    "category": "supported",
-   "answer": "Pre-existing conditions are excluded until thirty-six (36) months of continuous coverage have elapsed.",
+   "answer": "36 months of continuous coverage must elapse before a pre-existing condition is covered.",
    "correct": true,
-   "grounding": 0.9757726192474365,
+   "grounding": 0.6744085550308228,
    "signals": {
     "retrieval": 0.5683764815330505,
     "mean_logprob": null,
@@ -506,18 +506,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.3 establishes the answer",
+    "reason": "GOVERNED extract 3.3 states this",
     "ran": true,
-    "cost_usd": 0.00020520000000000003,
+    "cost_usd": 0.0002044,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.9757726192474365,
-    0.03533897176384926,
-    0.240604430437088,
-    0.012138068675994873
+    0.6744085550308228,
+    0.10810557752847672,
+    0.3356928527355194,
+    0.01571069099009037
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -542,31 +542,31 @@
      "score": 0.463
     }
    ],
-   "gen_ms": 6443,
-   "check_ms": 435,
-   "judge_ms": 1393,
-   "cost_usd": 0.00010180000000000001,
+   "gen_ms": 1641,
+   "check_ms": 725,
+   "judge_ms": 925,
+   "cost_usd": 0.0001006,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 452,
-    "completion_tokens": 19,
-    "total_tokens": 471
+    "completion_tokens": 17,
+    "total_tokens": 469
    },
-   "judge_cost_usd": 0.00020520000000000003,
-   "check_cost_usd": 6.041666666666667e-06
+   "judge_cost_usd": 0.0002044,
+   "check_cost_usd": 1.0069444444444445e-05
   },
   {
    "question": "What lookback period defines a pre-existing disease?",
    "expect": "48|forty[- ]eight",
    "category": "supported",
-   "answer": "The lookback period that defines a pre-existing disease is 48 months prior to the policy commencement date. Any condition, ailment or injury diagnosed or for which medical advice or treatment was received within this time frame is treated as pre-existing.",
+   "answer": "The lookback period that defines a pre-existing disease is 48 months. This is stated in section 3.3 of the policy. Any condition, ailment or injury diagnosed or for which medical advice or treatment was received within 48 months prior to the policy commencement date is treated as pre-existing.",
    "correct": true,
-   "grounding": 0.966366171836853,
+   "grounding": 0.9336995482444763,
    "signals": {
     "retrieval": 0.4429227113723755,
-    "mean_logprob": -0.051130431224211625,
-    "min_logprob": -0.5008066892623901,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -575,18 +575,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.3 explicitly states the lookback period.",
+    "reason": "GOVERNED extract 3.3 explicitly states the 48-month lookback period",
     "ran": true,
-    "cost_usd": 0.00022480000000000002,
+    "cost_usd": 0.00022860000000000003,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 1,
    "span_scores": [
-    0.2684098482131958,
-    0.966366171836853,
-    0.06322501599788666,
-    0.17236749827861786
+    0.2169404923915863,
+    0.9336995482444763,
+    0.061183154582977295,
+    0.27734121680259705
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -611,18 +611,18 @@
      "score": 0.305
     }
    ],
-   "gen_ms": 1109,
-   "check_ms": 570,
-   "judge_ms": 1159,
-   "cost_usd": 0.00013480000000000002,
+   "gen_ms": 4046,
+   "check_ms": 652,
+   "judge_ms": 989,
+   "cost_usd": 0.0001386,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 527,
-    "completion_tokens": 49,
-    "total_tokens": 576
+    "prompt_tokens": 507,
+    "completion_tokens": 62,
+    "total_tokens": 569
    },
-   "judge_cost_usd": 0.00022480000000000002,
-   "check_cost_usd": 7.916666666666667e-06
+   "judge_cost_usd": 0.00022860000000000003,
+   "check_cost_usd": 9.055555555555556e-06
   },
   {
    "question": "What is the room rent cap for a shared room?",
@@ -680,9 +680,9 @@
      "score": 0.124
     }
    ],
-   "gen_ms": 2374,
-   "check_ms": 416,
-   "judge_ms": 986,
+   "gen_ms": 1932,
+   "check_ms": 445,
+   "judge_ms": 981,
    "cost_usd": 0.0001128,
    "cost_source": "estimated",
    "usage": {
@@ -691,20 +691,20 @@
     "total_tokens": 524
    },
    "judge_cost_usd": 0.00021560000000000004,
-   "check_cost_usd": 5.777777777777778e-06
+   "check_cost_usd": 6.180555555555556e-06
   },
   {
    "question": "What is the cap for a single private AC room?",
    "expect": "2\\s?%|two per ?cent",
    "category": "supported",
-   "answer": "According to the policy extract [sample-policy.txt#3], the cap for a single private air-conditioned room is 2% of the sum insured per day.",
+   "answer": "According to the policy extracts, the cap for a single private air-conditioned room is 2% of the sum insured per day (Section 4.1 of sample-policy.txt). Note that the intranet-wiki-export.txt and support-macros.txt contradict this, stating a single cap of 3% for any room type, but based on the original policy extract, the answer is 2%.",
    "correct": true,
-   "grounding": 0.7856642603874207,
+   "grounding": 0.4982816278934479,
    "signals": {
     "retrieval": 0.5021765232086182,
-    "mean_logprob": -0.021214464114852057,
-    "min_logprob": -0.4496711194515228,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -715,16 +715,16 @@
     "confidence": 1.0,
     "reason": "GOVERNED extract 4.1 establishes the answer",
     "ran": true,
-    "cost_usd": 0.00023420000000000003,
+    "cost_usd": 0.0002442,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.7856642603874207,
-    0.24138431251049042,
-    0.03082915209233761,
-    0.004761655814945698
+    0.4982816278934479,
+    0.4367930293083191,
+    0.11797886341810226,
+    0.03975874185562134
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -749,31 +749,31 @@
      "score": 0.143
     }
    ],
-   "gen_ms": 945,
-   "check_ms": 516,
-   "judge_ms": 890,
-   "cost_usd": 0.0001408,
+   "gen_ms": 8802,
+   "check_ms": 1159,
+   "judge_ms": 913,
+   "cost_usd": 0.00016680000000000002,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 602,
-    "completion_tokens": 34,
-    "total_tokens": 636
+    "prompt_tokens": 582,
+    "completion_tokens": 84,
+    "total_tokens": 666
    },
-   "judge_cost_usd": 0.00023420000000000003,
-   "check_cost_usd": 7.166666666666667e-06
+   "judge_cost_usd": 0.0002442,
+   "check_cost_usd": 1.6097222222222223e-05
   },
   {
    "question": "What is the ICU charge cap?",
    "expect": "5\\s?%|five per ?cent",
    "category": "supported",
-   "answer": "According to the policy extracts, ICU charges are not capped. In fact, the macro \"icu\" states that \"ICU charges are covered in full with no sub-limit.\"",
+   "answer": "According to the policy extracts, there is no cap on ICU charges. In fact, the macro \"icu\" states that \"ICU charges are covered in full with no sub-limit.\"",
    "correct": false,
-   "grounding": 0.9666531085968018,
+   "grounding": 0.9652952551841736,
    "signals": {
     "retrieval": 0.3889700770378113,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.09862801830292003,
+    "min_logprob": -1.0608326196670532,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -784,16 +784,16 @@
     "confidence": 1.0,
     "reason": "GOVERNED extract 4.2 states ICU charges are capped at 5% of the sum insured per day",
     "ran": true,
-    "cost_usd": 0.0002334,
+    "cost_usd": 0.00023380000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.9666531085968018,
-    0.024212533608078957,
-    0.03093121014535427,
-    0.05059225112199783
+    0.9652952551841736,
+    0.05341179296374321,
+    0.04039773717522621,
+    0.05669504776597023
    ],
    "ungoverned_sources": [
     "support-macros.txt"
@@ -820,26 +820,26 @@
      "score": 0.178
     }
    ],
-   "gen_ms": 1229,
-   "check_ms": 506,
-   "judge_ms": 1085,
-   "cost_usd": 0.00013260000000000002,
+   "gen_ms": 6634,
+   "check_ms": 576,
+   "judge_ms": 1283,
+   "cost_usd": 0.0001338,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 552,
-    "completion_tokens": 37,
-    "total_tokens": 589
+    "completion_tokens": 39,
+    "total_tokens": 591
    },
-   "judge_cost_usd": 0.0002334,
-   "check_cost_usd": 7.027777777777778e-06
+   "judge_cost_usd": 0.00023380000000000002,
+   "check_cost_usd": 8e-06
   },
   {
    "question": "What happens if I take a room above my eligible rent?",
    "expect": "proportionat",
    "category": "supported",
-   "answer": "According to the policy extract, if you occupy a room whose rent exceeds the applicable cap, all associated charges for that admission are payable proportionately in the ratio the eligible room rent bears to the actual room rent (Section 4.3).",
+   "answer": "According to the policy extract (section 4.3), if you occupy a room whose rent exceeds the applicable cap, all associated charges for that admission are payable proportionately in the ratio the eligible room rent bears to the actual room rent.",
    "correct": true,
-   "grounding": 0.9771444201469421,
+   "grounding": 0.9754998683929443,
    "signals": {
     "retrieval": 0.4904877841472626,
     "mean_logprob": null,
@@ -853,18 +853,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 4.3 establishes the answer",
+    "reason": "Answer follows GOVERNED extract 4.3",
     "ran": true,
-    "cost_usd": 0.00024100000000000003,
+    "cost_usd": 0.00024040000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.9771444201469421,
-    0.047454576939344406,
-    0.06363076716661453,
-    0.027974452823400497
+    0.9754998683929443,
+    0.04165711626410484,
+    0.07150254398584366,
+    0.022116199135780334
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -889,9 +889,9 @@
      "score": 0.231
     }
    ],
-   "gen_ms": 2654,
-   "check_ms": 570,
-   "judge_ms": 845,
+   "gen_ms": 2356,
+   "check_ms": 612,
+   "judge_ms": 1644,
    "cost_usd": 0.00014940000000000003,
    "cost_source": "estimated",
    "usage": {
@@ -899,8 +899,8 @@
     "completion_tokens": 49,
     "total_tokens": 649
    },
-   "judge_cost_usd": 0.00024100000000000003,
-   "check_cost_usd": 7.916666666666667e-06
+   "judge_cost_usd": 0.00024040000000000002,
+   "check_cost_usd": 8.5e-06
   },
   {
    "question": "Is cosmetic surgery covered?",
@@ -950,8 +950,8 @@
      "score": 0.249
     }
    ],
-   "gen_ms": 1524,
-   "check_ms": 404,
+   "gen_ms": 2127,
+   "check_ms": 473,
    "judge_ms": 0,
    "cost_usd": 0.0001156,
    "cost_source": "estimated",
@@ -961,20 +961,20 @@
     "total_tokens": 556
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.611111111111112e-06
+   "check_cost_usd": 6.569444444444444e-06
   },
   {
    "question": "Is dental treatment covered?",
    "expect": "accident|hospitalis|exclu|not covered",
    "category": "supported",
-   "answer": "Dental treatment is excluded under section 5.2 of the policy, unless it requires hospitalization following an accidental injury. However, routine dental scaling is covered once per policy year under the wellness benefit.",
+   "answer": "Dental treatment is excluded under section 5.2 of the policy, unless it requires hospitalization following accidental injury. However, routine dental scaling is covered once per policy year under the wellness benefit.",
    "correct": true,
-   "grounding": 0.04647098481655121,
+   "grounding": 0.04591049253940582,
    "signals": {
     "retrieval": 0.5439012050628662,
-    "mean_logprob": -0.05346141967537516,
-    "min_logprob": -1.3808079957962036,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -983,18 +983,18 @@
    "judge": {
     "verdict": "contradicted",
     "confidence": 1.0,
-    "reason": "GOVERNED extract excludes routine dental treatment",
+    "reason": "GOVERNED extract 5.2 excludes dental treatment unless hospitalisation is required following accidental injury.",
     "ran": true,
-    "cost_usd": 0.0002366,
+    "cost_usd": 0.0002436,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 1,
    "span_scores": [
-    0.030430909246206284,
-    0.04647098481655121,
-    0.011806448921561241,
-    0.006964207161217928
+    0.031466834247112274,
+    0.04591049253940582,
+    0.01222363393753767,
+    0.007249288726598024
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1019,31 +1019,31 @@
      "score": 0.311
     }
    ],
-   "gen_ms": 1164,
-   "check_ms": 527,
-   "judge_ms": 1144,
-   "cost_usd": 0.0001472,
+   "gen_ms": 4124,
+   "check_ms": 560,
+   "judge_ms": 1218,
+   "cost_usd": 0.0001426,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 610,
-    "completion_tokens": 42,
-    "total_tokens": 652
+    "prompt_tokens": 590,
+    "completion_tokens": 41,
+    "total_tokens": 631
    },
-   "judge_cost_usd": 0.0002366,
-   "check_cost_usd": 7.319444444444445e-06
+   "judge_cost_usd": 0.0002436,
+   "check_cost_usd": 7.77777777777778e-06
   },
   {
    "question": "Am I covered for treatment in Singapore?",
    "expect": "outside|India|not covered|exclu",
    "category": "supported",
-   "answer": "According to the policy extracts, treatment taken outside the territorial limits of India (section 5.3) is not covered, but there is an exception for emergency treatment taken abroad, which is reimbursed at Indian tariff rates (intranet-wiki-export.txt#7). So, you may be covered for emergency treatment in Singapore, but not for non-emergency treatment.",
+   "answer": "According to the provided policy extracts, treatment taken outside the territorial limits of India (section 5.3) is not covered, but there is an exception for emergency treatment taken abroad, which is reimbursed at Indian tariff rates (intranet-wiki-export.txt#7). Therefore, you may be covered for emergency treatment in Singapore, but only at Indian tariff rates, and non-emergency treatment is not covered.",
    "correct": true,
-   "grounding": 0.02977273426949978,
+   "grounding": 0.033478107303380966,
    "signals": {
     "retrieval": 0.39991849660873413,
-    "mean_logprob": -0.048727569443994694,
-    "min_logprob": -0.8916246294975281,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1052,10 +1052,10 @@
    "judge": null,
    "best_span": 1,
    "span_scores": [
-    0.017684206366539,
-    0.02977273426949978,
-    0.024665435776114464,
-    0.010277979075908661
+    0.02271071821451187,
+    0.033478107303380966,
+    0.030617572367191315,
+    0.013099825009703636
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1080,30 +1080,30 @@
      "score": 0.338
     }
    ],
-   "gen_ms": 1686,
-   "check_ms": 637,
+   "gen_ms": 5596,
+   "check_ms": 736,
    "judge_ms": 0,
-   "cost_usd": 0.0001588,
+   "cost_usd": 0.00016020000000000002,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 566,
-    "completion_tokens": 76,
-    "total_tokens": 642
+    "prompt_tokens": 546,
+    "completion_tokens": 85,
+    "total_tokens": 631
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 8.847222222222223e-06
+   "check_cost_usd": 1.0222222222222223e-05
   },
   {
    "question": "Is professional bungee jumping covered?",
    "expect": "hazardous|adventure|exclu|not covered",
    "category": "supported",
-   "answer": "No, professional bungee jumping is not covered as it falls under \"participation in hazardous or adventure sports in a professional capacity\" which is excluded under section 5.4 of the policy.",
+   "answer": "No, professional bungee jumping is not covered as it falls under \"hazardous or adventure sports in a professional capacity\" which is excluded under section 5.4 of the policy.",
    "correct": true,
-   "grounding": 0.10471656173467636,
+   "grounding": 0.06943321973085403,
    "signals": {
     "retrieval": 0.3241114020347595,
-    "mean_logprob": -0.2048439895055349,
-    "min_logprob": -0.8490079045295715,
+    "mean_logprob": -0.06720063860051194,
+    "min_logprob": -0.5492656230926514,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -1113,10 +1113,10 @@
    "judge": null,
    "best_span": 2,
    "span_scores": [
-    0.026873599737882614,
-    0.010903222486376762,
-    0.10471656173467636,
-    0.010616132989525795
+    0.02308885008096695,
+    0.010861816816031933,
+    0.06943321973085403,
+    0.014769273810088634
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1141,30 +1141,30 @@
      "score": 0.182
     }
    ],
-   "gen_ms": 2471,
-   "check_ms": 521,
+   "gen_ms": 6819,
+   "check_ms": 510,
    "judge_ms": 0,
-   "cost_usd": 0.000135,
+   "cost_usd": 0.00013440000000000001,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 552,
-    "completion_tokens": 41,
-    "total_tokens": 593
+    "completion_tokens": 40,
+    "total_tokens": 592
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 7.2361111111111115e-06
+   "check_cost_usd": 7.083333333333334e-06
   },
   {
    "question": "How far in advance must I pre-authorise a planned admission?",
    "expect": "48|forty[- ]eight",
    "category": "supported",
-   "answer": "According to the policy extracts, for a planned admission, you must pre-authorise at least 48 hours before admission at a network hospital (as per sample-policy.txt#4, SECTION 7 \u2014 CLAIMS, 7.1). However, another extract (intranet-wiki-export.txt#8) states that 24 hours before admission is fine for planned procedures, which seems to contradict the 48-hour requirement. To be safe, it's best to follow the more stringent requirement of 48 hours.",
+   "answer": "According to the policy extracts, for a planned admission, you must pre-authorise at least 48 hours before admission (as stated in section 7.1 of sample-policy.txt#4). However, another extract (intranet-wiki-export.txt#8) mentions that 24 hours before admission is fine for planned procedures, which seems to contradict the 48-hour requirement. To be safe, it would be best to follow the 48-hour guideline.",
    "correct": true,
-   "grounding": 0.28715217113494873,
+   "grounding": 0.32331326603889465,
    "signals": {
     "retrieval": 0.67516028881073,
-    "mean_logprob": -0.08186163654210862,
-    "min_logprob": -1.0086588859558105,
+    "mean_logprob": -0.08219888573762722,
+    "min_logprob": -0.7903242111206055,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -1174,18 +1174,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract establishes 48-hour pre-authorisation requirement",
+    "reason": "GOVERNED extract establishes the answer",
     "ran": true,
-    "cost_usd": 0.0002322,
+    "cost_usd": 0.00022700000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 3,
    "span_scores": [
-    0.14601857960224152,
-    0.05129247531294823,
-    0.0873105525970459,
-    0.28715217113494873
+    0.2158106416463852,
+    0.06348022073507309,
+    0.08738595247268677,
+    0.32331326603889465
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1210,31 +1210,31 @@
      "score": 0.301
     }
    ],
-   "gen_ms": 1775,
-   "check_ms": 815,
-   "judge_ms": 1127,
-   "cost_usd": 0.0001666,
+   "gen_ms": 2017,
+   "check_ms": 810,
+   "judge_ms": 923,
+   "cost_usd": 0.00016,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 518,
-    "completion_tokens": 105,
-    "total_tokens": 623
+    "completion_tokens": 94,
+    "total_tokens": 612
    },
-   "judge_cost_usd": 0.0002322,
-   "check_cost_usd": 1.1319444444444444e-05
+   "judge_cost_usd": 0.00022700000000000002,
+   "check_cost_usd": 1.125e-05
   },
   {
    "question": "How quickly must I notify you of an emergency admission?",
    "expect": "24|twenty[- ]four",
    "category": "supported",
-   "answer": "According to the policy extract, for an emergency admission, you must notify us for cashless treatment pre-authorisation at a network hospital within twenty-four (24) hours of the admission.",
+   "answer": "For an emergency admission, you must notify us for pre-authorisation at a network hospital within twenty-four (24) hours of the admission.",
    "correct": true,
-   "grounding": 0.8385466933250427,
+   "grounding": 0.898399829864502,
    "signals": {
     "retrieval": 0.33279716968536377,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.009235359169183924,
+    "min_logprob": -0.054969530552625656,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -1245,16 +1245,16 @@
     "confidence": 1.0,
     "reason": "GOVERNED extract 7.1 establishes the answer",
     "ran": true,
-    "cost_usd": 0.00020520000000000003,
+    "cost_usd": 0.0002034,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 2,
    "span_scores": [
-    0.017641033977270126,
-    0.11219780892133713,
-    0.8385466933250427,
-    0.013555962592363358
+    0.01347663439810276,
+    0.054105911403894424,
+    0.898399829864502,
+    0.00736345537006855
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1279,31 +1279,31 @@
      "score": 0.289
     }
    ],
-   "gen_ms": 3764,
-   "check_ms": 431,
-   "judge_ms": 979,
-   "cost_usd": 0.00010920000000000001,
+   "gen_ms": 2510,
+   "check_ms": 432,
+   "judge_ms": 958,
+   "cost_usd": 0.0001078,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 432,
-    "completion_tokens": 38,
-    "total_tokens": 470
+    "prompt_tokens": 452,
+    "completion_tokens": 29,
+    "total_tokens": 481
    },
-   "judge_cost_usd": 0.00020520000000000003,
-   "check_cost_usd": 5.986111111111112e-06
+   "judge_cost_usd": 0.0002034,
+   "check_cost_usd": 6e-06
   },
   {
    "question": "What is the deadline to submit a reimbursement claim?",
    "expect": "15|fifteen",
    "category": "supported",
-   "answer": "According to the policy extracts, the deadline to submit a reimbursement claim is within 15 days of discharge (Section 7.2, sample-policy.txt#4). However, there is also a macro (reimbursement_window) that mentions a 30-day deadline, but this seems to be a more general guideline rather than a strict policy term. The explicit policy term in Section 7.2 takes precedence.",
+   "answer": "The deadline to submit a reimbursement claim is within fifteen (15) days of discharge, as stated in section 7.2 of the policy.",
    "correct": true,
-   "grounding": 0.4070979356765747,
+   "grounding": 0.7278470396995544,
    "signals": {
     "retrieval": 0.5890899896621704,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.06865251557337555,
+    "min_logprob": -0.3884667754173279,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -1314,20 +1314,18 @@
     "confidence": 1.0,
     "reason": "GOVERNED extract 7.2 establishes the answer",
     "ran": true,
-    "cost_usd": 0.00021300000000000003,
+    "cost_usd": 0.0002022,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
-   "best_span": 1,
+   "best_span": 2,
    "span_scores": [
-    0.11649913340806961,
-    0.4070979356765747,
-    0.32733431458473206,
-    0.17416538298130035
+    0.02312564291059971,
+    0.1354983150959015,
+    0.7278470396995544,
+    0.06839287281036377
    ],
-   "ungoverned_sources": [
-    "support-macros.txt"
-   ],
+   "ungoverned_sources": [],
    "sources": [
     {
      "source": "sample-policy.txt",
@@ -1350,18 +1348,18 @@
      "score": 0.358
     }
    ],
-   "gen_ms": 4167,
-   "check_ms": 738,
-   "judge_ms": 1129,
-   "cost_usd": 0.0001352,
+   "gen_ms": 2099,
+   "check_ms": 481,
+   "judge_ms": 1679,
+   "cost_usd": 0.00010680000000000001,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 424,
-    "completion_tokens": 84,
-    "total_tokens": 508
+    "prompt_tokens": 444,
+    "completion_tokens": 30,
+    "total_tokens": 474
    },
-   "judge_cost_usd": 0.00021300000000000003,
-   "check_cost_usd": 1.025e-05
+   "judge_cost_usd": 0.0002022,
+   "check_cost_usd": 6.680555555555556e-06
   },
   {
    "question": "How long do you take to settle a claim?",
@@ -1419,9 +1417,9 @@
      "score": 0.318
     }
    ],
-   "gen_ms": 1093,
-   "check_ms": 377,
-   "judge_ms": 1123,
+   "gen_ms": 2708,
+   "check_ms": 420,
+   "judge_ms": 905,
    "cost_usd": 9.74e-05,
    "cost_source": "estimated",
    "usage": {
@@ -1430,7 +1428,7 @@
     "total_tokens": 445
    },
    "judge_cost_usd": 0.00020040000000000002,
-   "check_cost_usd": 5.236111111111111e-06
+   "check_cost_usd": 5.833333333333333e-06
   },
   {
    "question": "Are ambulance charges reimbursed?",
@@ -1441,9 +1439,9 @@
    "grounding": 0.5947505235671997,
    "signals": {
     "retrieval": 0.4133571982383728,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.06235196596086704,
+    "min_logprob": -0.25219208002090454,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1480,31 +1478,31 @@
      "score": 0.257
     }
    ],
-   "gen_ms": 1557,
-   "check_ms": 394,
+   "gen_ms": 1271,
+   "check_ms": 472,
    "judge_ms": 0,
-   "cost_usd": 0.00011200000000000001,
+   "cost_usd": 0.000116,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 527,
+    "prompt_tokens": 547,
     "completion_tokens": 11,
-    "total_tokens": 538
+    "total_tokens": 558
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.472222222222223e-06
+   "check_cost_usd": 6.5555555555555556e-06
   },
   {
    "question": "Is AYUSH or homeopathic treatment covered?",
    "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
    "category": "not_covered",
-   "answer": "The provided policy extracts do not cover this information.",
+   "answer": "The provided policy extracts do not mention AYUSH or homeopathic treatment.",
    "correct": true,
-   "grounding": 0.5992479920387268,
+   "grounding": 0.04742977395653725,
    "signals": {
     "retrieval": 0.3646029531955719,
-    "mean_logprob": -0.19320009322818804,
-    "min_logprob": -1.3132693767547607,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1513,10 +1511,10 @@
    "judge": null,
    "best_span": 2,
    "span_scores": [
-    0.5841451287269592,
-    0.11344192922115326,
-    0.5992479920387268,
-    0.08570238947868347
+    0.03796359896659851,
+    0.024362461641430855,
+    0.04742977395653725,
+    0.015103799290955067
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1541,31 +1539,31 @@
      "score": 0.259
     }
    ],
-   "gen_ms": 775,
-   "check_ms": 405,
+   "gen_ms": 2048,
+   "check_ms": 437,
    "judge_ms": 0,
-   "cost_usd": 0.00011180000000000001,
+   "cost_usd": 0.00011080000000000001,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 526,
-    "completion_tokens": 11,
-    "total_tokens": 537
+    "prompt_tokens": 506,
+    "completion_tokens": 16,
+    "total_tokens": 522
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.625e-06
+   "check_cost_usd": 6.069444444444445e-06
   },
   {
    "question": "What is the co-payment percentage for senior citizens?",
    "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
    "category": "not_covered",
-   "answer": "The provided policy extracts do not mention the co-payment percentage for senior citizens.",
+   "answer": "The policy extracts do not cover the co-payment percentage for senior citizens.",
    "correct": true,
-   "grounding": 0.07130489498376846,
+   "grounding": 0.05779567360877991,
    "signals": {
     "retrieval": 0.25737932324409485,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.0770042366561583,
+    "min_logprob": -0.4740820527076721,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1574,10 +1572,10 @@
    "judge": null,
    "best_span": 0,
    "span_scores": [
-    0.07130489498376846,
-    0.033665746450424194,
-    0.03284873440861702,
-    0.013971223495900631
+    0.05779567360877991,
+    0.02496318891644478,
+    0.023312725126743317,
+    0.009619245305657387
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1602,18 +1600,18 @@
      "score": 0.151
     }
    ],
-   "gen_ms": 1850,
-   "check_ms": 413,
+   "gen_ms": 2335,
+   "check_ms": 705,
    "judge_ms": 0,
-   "cost_usd": 0.0001292,
+   "cost_usd": 0.00013260000000000002,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 598,
-    "completion_tokens": 16,
-    "total_tokens": 614
+    "prompt_tokens": 618,
+    "completion_tokens": 15,
+    "total_tokens": 633
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.7361111111111114e-06
+   "check_cost_usd": 9.791666666666666e-06
   },
   {
    "question": "Do you offer a no-claim bonus?",
@@ -1624,9 +1622,9 @@
    "grounding": 0.1870015561580658,
    "signals": {
     "retrieval": 0.32220542430877686,
-    "mean_logprob": -0.020363561919180685,
-    "min_logprob": -0.20207488536834717,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1663,18 +1661,18 @@
      "score": 0.276
     }
    ],
-   "gen_ms": 1219,
-   "check_ms": 368,
+   "gen_ms": 1440,
+   "check_ms": 444,
    "judge_ms": 0,
-   "cost_usd": 0.00010580000000000001,
+   "cost_usd": 0.00010180000000000001,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 487,
+    "prompt_tokens": 467,
     "completion_tokens": 14,
-    "total_tokens": 501
+    "total_tokens": 481
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.1111111111111115e-06
+   "check_cost_usd": 6.166666666666667e-06
   },
   {
    "question": "Are pre- and post-hospitalisation expenses included?",
@@ -1685,9 +1683,9 @@
    "grounding": 0.1629728078842163,
    "signals": {
     "retrieval": 0.5308542251586914,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.03702340730427878,
+    "min_logprob": -0.3871665894985199,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1724,26 +1722,26 @@
      "score": 0.348
     }
    ],
-   "gen_ms": 1390,
-   "check_ms": 416,
+   "gen_ms": 780,
+   "check_ms": 443,
    "judge_ms": 0,
-   "cost_usd": 0.00010860000000000001,
+   "cost_usd": 0.00011260000000000001,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 492,
+    "prompt_tokens": 512,
     "completion_tokens": 17,
-    "total_tokens": 509
+    "total_tokens": 529
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.777777777777778e-06
+   "check_cost_usd": 6.152777777777778e-06
   },
   {
    "question": "Is mental health treatment covered?",
    "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
    "category": "not_covered",
-   "answer": "The provided policy extracts do not cover this information, so I cannot say whether mental health treatment is covered or not.",
+   "answer": "The provided policy extracts do not cover this information.",
    "correct": true,
-   "grounding": 0.8814352750778198,
+   "grounding": 0.5992479920387268,
    "signals": {
     "retrieval": 0.3182310461997986,
     "mean_logprob": null,
@@ -1757,10 +1755,10 @@
    "judge": null,
    "best_span": 1,
    "span_scores": [
-    0.3521416485309601,
-    0.8814352750778198,
-    0.47760751843452454,
-    0.2645600140094757
+    0.1569346785545349,
+    0.5992479920387268,
+    0.5841451287269592,
+    0.25280874967575073
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1785,31 +1783,31 @@
      "score": 0.299
     }
    ],
-   "gen_ms": 2324,
-   "check_ms": 429,
+   "gen_ms": 2981,
+   "check_ms": 407,
    "judge_ms": 0,
-   "cost_usd": 0.0001212,
+   "cost_usd": 0.0001134,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 534,
-    "completion_tokens": 24,
-    "total_tokens": 558
+    "completion_tokens": 11,
+    "total_tokens": 545
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 5.958333333333334e-06
+   "check_cost_usd": 5.6527777777777775e-06
   },
   {
    "question": "Can I port this policy from another insurer?",
    "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
    "category": "not_covered",
-   "answer": "The provided policy extracts do not cover porting a policy from another insurer.",
+   "answer": "The provided policy extracts do not cover policy porting from another insurer.",
    "correct": true,
-   "grounding": 0.4306739866733551,
+   "grounding": 0.2266099601984024,
    "signals": {
     "retrieval": 0.3758830428123474,
-    "mean_logprob": -0.02827757130125974,
-    "min_logprob": -0.186961367726326,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": true,
@@ -1818,10 +1816,10 @@
    "judge": null,
    "best_span": 0,
    "span_scores": [
-    0.4306739866733551,
-    0.12045721709728241,
-    0.0955454483628273,
-    0.03380834311246872
+    0.2266099601984024,
+    0.06721671670675278,
+    0.05781341344118118,
+    0.020346080884337425
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1846,15 +1844,15 @@
      "score": 0.326
     }
    ],
-   "gen_ms": 1347,
+   "gen_ms": 2253,
    "check_ms": 416,
    "judge_ms": 0,
-   "cost_usd": 0.00011980000000000001,
+   "cost_usd": 0.00011520000000000001,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 551,
-    "completion_tokens": 16,
-    "total_tokens": 567
+    "prompt_tokens": 531,
+    "completion_tokens": 15,
+    "total_tokens": 546
    },
    "judge_cost_usd": null,
    "check_cost_usd": 5.777777777777778e-06
@@ -1863,13 +1861,13 @@
    "question": "Are organ donor expenses covered?",
    "expect": "not (covered|specified|mention|address|state)|does not (cover|specify|mention|address|state)|no (provision|information|mention|detail)|not (stated|found|present)|do not (cover|contain|mention)|silent|cannot (find|answer)|isn't (covered|mentioned)",
    "category": "not_covered",
-   "answer": "The provided policy extracts do not cover this topic, so I cannot say whether organ donor expenses are covered or not.",
+   "answer": "The provided policy extracts do not mention organ donor expenses.",
    "correct": true,
-   "grounding": 0.12367343157529831,
+   "grounding": 0.05525738373398781,
    "signals": {
     "retrieval": 0.32372012734413147,
-    "mean_logprob": -0.09000171427797454,
-    "min_logprob": -1.313361644744873,
+    "mean_logprob": -0.0687157752910149,
+    "min_logprob": -0.38760802149772644,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -1879,10 +1877,10 @@
    "judge": null,
    "best_span": 3,
    "span_scores": [
-    0.061390072107315063,
-    0.05453125759959221,
-    0.04443866014480591,
-    0.12367343157529831
+    0.048824992030858994,
+    0.017812497913837433,
+    0.03229985758662224,
+    0.05525738373398781
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1907,31 +1905,31 @@
      "score": 0.286
     }
    ],
-   "gen_ms": 1502,
-   "check_ms": 436,
+   "gen_ms": 1621,
+   "check_ms": 447,
    "judge_ms": 0,
-   "cost_usd": 0.0001352,
+   "cost_usd": 0.00012800000000000002,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 604,
-    "completion_tokens": 24,
-    "total_tokens": 628
+    "completion_tokens": 12,
+    "total_tokens": 616
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 6.055555555555556e-06
+   "check_cost_usd": 6.208333333333334e-06
   },
   {
    "question": "Since cataract has no waiting period, can I claim in month 2?",
    "expect": "24|twenty[- ]four|incorrect|not correct|does have",
    "category": "contradicted",
-   "answer": "According to the policy extracts, even though cataract has no specified waiting period, there is still an initial waiting period of 30 days (section 3.1) that applies to all illnesses, except for accidental injury. \n\nSince 30 days is approximately 1 month, and you want to claim in month 2, the answer is yes, you can claim for cataract in month 2, as the initial 30-day waiting period would have passed.",
+   "answer": "According to the policy extracts, even though cataract was moved out of the specified-illness list and has no waiting period in that sense, there is still an initial waiting period of 30 days (section 3.1) during which no claim is payable for any illness diagnosed or treated, except for accidental injury.\n\nSince you want to claim in month 2, which is well after the initial 30-day period, the answer is yes, you can claim for cataract in month 2.",
    "correct": false,
-   "grounding": 0.5314443111419678,
+   "grounding": 0.5967318415641785,
    "signals": {
     "retrieval": 0.5775954723358154,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.060693065928119586,
+    "min_logprob": -1.5317714214324951,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -1940,18 +1938,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extracts establish the initial waiting period",
+    "reason": "GOVERNED extract establishes initial waiting period",
     "ran": true,
-    "cost_usd": 0.00023220000000000003,
+    "cost_usd": 0.0002332,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 2,
    "span_scores": [
-    0.2679775357246399,
-    0.35858139395713806,
-    0.5314443111419678,
-    0.1542334258556366
+    0.3735261857509613,
+    0.39698097109794617,
+    0.5967318415641785,
+    0.19909869134426117
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -1976,26 +1974,26 @@
      "score": 0.352
     }
    ],
-   "gen_ms": 5023,
-   "check_ms": 666,
-   "judge_ms": 1098,
-   "cost_usd": 0.0001608,
+   "gen_ms": 2350,
+   "check_ms": 883,
+   "judge_ms": 976,
+   "cost_usd": 0.0001696,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 513,
-    "completion_tokens": 97,
-    "total_tokens": 610
+    "prompt_tokens": 533,
+    "completion_tokens": 105,
+    "total_tokens": 638
    },
-   "judge_cost_usd": 0.00023220000000000003,
-   "check_cost_usd": 9.250000000000001e-06
+   "judge_cost_usd": 0.0002332,
+   "check_cost_usd": 1.2263888888888889e-05
   },
   {
    "question": "The policy covers unlimited deliveries, right?",
    "expect": "two|2\\b|limited|incorrect|not correct",
    "category": "contradicted",
-   "answer": "No, the policy does not cover unlimited deliveries. According to the extract, maternity expenses, including deliveries, are limited to two deliveries per insured person for the lifetime of the policy (section 3.4).",
+   "answer": "No, according to the policy extracts, maternity expenses are limited to two deliveries per insured person for the lifetime of the policy (Section 3.4).",
    "correct": true,
-   "grounding": 0.9482904076576233,
+   "grounding": 0.9054949879646301,
    "signals": {
     "retrieval": 0.3773621916770935,
     "mean_logprob": null,
@@ -2003,16 +2001,24 @@
     "logprobs_available": false,
     "pii": {},
     "reask": false,
-    "abstains": true,
+    "abstains": false,
     "asserts_premise": false
    },
-   "judge": null,
+   "judge": {
+    "verdict": "supported",
+    "confidence": 1.0,
+    "reason": "GOVERNED extract 3.4 explicitly states the limit",
+    "ran": true,
+    "cost_usd": 0.00023740000000000002,
+    "cost_source": "estimated",
+    "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
+   },
    "best_span": 0,
    "span_scores": [
-    0.9482904076576233,
-    0.021049320697784424,
-    0.02753768488764763,
-    0.042913466691970825
+    0.9054949879646301,
+    0.0053072539158165455,
+    0.008407429791986942,
+    0.009860441088676453
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2037,26 +2043,26 @@
      "score": 0.312
     }
    ],
-   "gen_ms": 2495,
-   "check_ms": 524,
-   "judge_ms": 0,
-   "cost_usd": 0.0001452,
+   "gen_ms": 4025,
+   "check_ms": 774,
+   "judge_ms": 950,
+   "cost_usd": 0.0001386,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 597,
-    "completion_tokens": 43,
-    "total_tokens": 640
+    "completion_tokens": 32,
+    "total_tokens": 629
    },
-   "judge_cost_usd": null,
-   "check_cost_usd": 7.277777777777778e-06
+   "judge_cost_usd": 0.00023740000000000002,
+   "check_cost_usd": 1.075e-05
   },
   {
    "question": "Confirm that dental implants are fully covered.",
    "expect": "exclu|not covered|only|accident|incorrect",
    "category": "contradicted",
-   "answer": "The policy extracts do not confirm that dental implants are fully covered. In fact, section 5.2 of the sample policy states that dental treatment is not covered, unless it requires hospitalization following accidental injury. There is a mention of routine dental scaling being covered once per policy year under the wellness benefit, but there is no information about dental implants.",
+   "answer": "The policy extracts do not confirm that dental implants are fully covered. In fact, section 5.2 of the sample policy states that dental treatment is excluded unless it requires hospitalization following accidental injury. There is a mention of routine dental scaling being covered once per policy year under the wellness benefit, but there is no specific mention of dental implants.",
    "correct": true,
-   "grounding": 0.07597100734710693,
+   "grounding": 0.05938723683357239,
    "signals": {
     "retrieval": 0.36031532287597656,
     "mean_logprob": null,
@@ -2070,10 +2076,10 @@
    "judge": null,
    "best_span": 1,
    "span_scores": [
-    0.02038802020251751,
-    0.07597100734710693,
-    0.014342098496854305,
-    0.006922609638422728
+    0.020211849361658096,
+    0.05938723683357239,
+    0.01556119229644537,
+    0.008189327083528042
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2098,51 +2104,51 @@
      "score": 0.249
     }
    ],
-   "gen_ms": 7892,
-   "check_ms": 616,
+   "gen_ms": 8227,
+   "check_ms": 797,
    "judge_ms": 0,
-   "cost_usd": 0.00016120000000000002,
+   "cost_usd": 0.0001606,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 593,
-    "completion_tokens": 71,
-    "total_tokens": 664
+    "completion_tokens": 70,
+    "total_tokens": 663
    },
    "judge_cost_usd": null,
-   "check_cost_usd": 8.555555555555556e-06
+   "check_cost_usd": 1.1069444444444445e-05
   },
   {
    "question": "Given that maternity is covered after 12 months, when can I claim?",
    "expect": "24|twenty[- ]four|incorrect|not correct|actually",
    "category": "contradicted",
-   "answer": "According to the information provided, maternity expenses are covered after 12 months of continuous coverage, but the exact timing of when you can claim is not specified in the provided extracts. However, it is mentioned in the reimbursement_window macro that you should send original documents within 30 days of discharge. \n\nSo, while we know maternity is covered after 12 months, the exact procedure for claiming (e.g. how soon after the event) is only partially covered, and the company will settle or reject a claim within 30 days of receiving the last necessary document (Section 7.3 of the sample policy).",
+   "answer": "According to the provided information, maternity expenses are payable after twelve (12) months of continuous coverage. However, it's also mentioned in the sample-policy.txt that you should send the original documents within thirty (30) days of discharge, as stated in the reimbursement_window macro. \n\nSo, you can claim for maternity expenses after 12 months of continuous coverage, and you should submit your claim within 30 days of discharge. The company will then settle or reject your claim within 30 days of receiving the last necessary document, as stated in section 7.3 of the sample policy.",
    "correct": false,
-   "grounding": 0.28413113951683044,
+   "grounding": 0.39694637060165405,
    "signals": {
     "retrieval": 0.6512556672096252,
-    "mean_logprob": null,
-    "min_logprob": null,
-    "logprobs_available": false,
+    "mean_logprob": -0.13228072190674092,
+    "min_logprob": -1.4062327146530151,
+    "logprobs_available": true,
     "pii": {},
     "reask": false,
-    "abstains": true,
+    "abstains": false,
     "asserts_premise": true
    },
    "judge": {
     "verdict": "contradicted",
     "confidence": 1.0,
-    "reason": "GOVERNED extract states maternity expenses are payable after 24 months of continuous coverage",
+    "reason": "GOVERNED extract states maternity expenses are payable after 24 months",
     "ran": true,
-    "cost_usd": 0.00023820000000000002,
+    "cost_usd": 0.00023560000000000003,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 2,
    "span_scores": [
-    0.026647314429283142,
-    0.04328962415456772,
-    0.28413113951683044,
-    0.2624613642692566
+    0.07106881588697433,
+    0.08681195229291916,
+    0.39694637060165405,
+    0.27800092101097107
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2167,30 +2173,30 @@
      "score": 0.404
     }
    ],
-   "gen_ms": 6513,
-   "check_ms": 837,
-   "judge_ms": 1245,
-   "cost_usd": 0.0001722,
+   "gen_ms": 5670,
+   "check_ms": 958,
+   "judge_ms": 1136,
+   "cost_usd": 0.0001738,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 492,
-    "completion_tokens": 123,
-    "total_tokens": 615
+    "prompt_tokens": 512,
+    "completion_tokens": 119,
+    "total_tokens": 631
    },
-   "judge_cost_usd": 0.00023820000000000002,
-   "check_cost_usd": 1.1625e-05
+   "judge_cost_usd": 0.00023560000000000003,
+   "check_cost_usd": 1.3305555555555556e-05
   },
   {
    "question": "I was told pre-existing conditions are covered after 24 months. Correct?",
    "expect": "36|thirty[- ]six|incorrect|not correct|actually",
    "category": "contradicted",
-   "answer": "No, that is incorrect according to the policy extract. Pre-existing diseases are excluded until thirty-six (36) months of continuous coverage have elapsed, as stated in section 3.3 of the sample-policy.txt. The support macro \"preexisting\" appears to be outdated or incorrect.",
+   "answer": "No, that's incorrect according to the policy extracts. Pre-existing conditions are excluded until thirty-six (36) months of continuous coverage have elapsed, as stated in section 3.3 of the sample policy. The support macro library contains incorrect information in this case.",
    "correct": true,
-   "grounding": 0.49418503046035767,
+   "grounding": 0.27339258790016174,
    "signals": {
     "retrieval": 0.6500229835510254,
-    "mean_logprob": -0.18209606755730887,
-    "min_logprob": -1.8265138864517212,
+    "mean_logprob": -0.11552798052692696,
+    "min_logprob": -0.6410033702850342,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -2200,18 +2206,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 3.3 states pre-existing diseases are excluded until thirty-six months.",
+    "reason": "GOVERNED extract 3.3 states pre-existing conditions are excluded until thirty-six months.",
     "ran": true,
-    "cost_usd": 0.000239,
+    "cost_usd": 0.00023820000000000004,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.49418503046035767,
-    0.07674945890903473,
-    0.08884452283382416,
-    0.05022699758410454
+    0.27339258790016174,
+    0.06838243454694748,
+    0.07925626635551453,
+    0.0432773232460022
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2236,26 +2242,26 @@
      "score": 0.481
     }
    ],
-   "gen_ms": 2816,
-   "check_ms": 600,
-   "judge_ms": 1033,
-   "cost_usd": 0.0001504,
+   "gen_ms": 3215,
+   "check_ms": 975,
+   "judge_ms": 1347,
+   "cost_usd": 0.00014800000000000002,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 578,
-    "completion_tokens": 58,
-    "total_tokens": 636
+    "completion_tokens": 54,
+    "total_tokens": 632
    },
-   "judge_cost_usd": 0.000239,
-   "check_cost_usd": 8.333333333333334e-06
+   "judge_cost_usd": 0.00023820000000000004,
+   "check_cost_usd": 1.3541666666666668e-05
   },
   {
    "question": "Since the room rent cap is a flat 3%, can I pick any room?",
    "expect": "1\\s?%|2\\s?%|one per ?cent|two per ?cent|incorrect|not correct|proportionat",
    "category": "contradicted",
-   "answer": "No, the information about the room rent cap being a flat 3% is contradicted by the policy extracts in [sample-policy.txt#3], which state that the room rent cap is 1% of the sum insured per day for a shared room and 2% of the sum insured per day for a single private air-conditioned room. The statement about a 3% cap appears in other extracts, but it is not consistent with the policy details provided in [sample-policy.txt#3].",
+   "answer": "No, the information about a flat 3% room rent cap appears to be inconsistent across the provided policy extracts. According to the sample-policy.txt extract, the room rent cap is 1% of the sum insured per day for a shared room and 2% for a single private air-conditioned room, not a flat 3%. The intranet-wiki-export.txt and support-macros.txt suggest a flat 3% cap, but this seems to contradict the sample-policy.txt. Therefore, it's unclear which policy is correct, and it's best to consult the actual policy document or contact the issuer for clarification.",
    "correct": true,
-   "grounding": 0.7406135201454163,
+   "grounding": 0.20479264855384827,
    "signals": {
     "retrieval": 0.4988756775856018,
     "mean_logprob": null,
@@ -2267,20 +2273,20 @@
     "asserts_premise": true
    },
    "judge": {
-    "verdict": "supported",
+    "verdict": "contradicted",
     "confidence": 1.0,
-    "reason": "GOVERNED extract establishes the answer",
+    "reason": "GOVERNED extract states room rent cap is not a flat 3%",
     "ran": true,
-    "cost_usd": 0.0002502,
+    "cost_usd": 0.0002614,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 0,
    "span_scores": [
-    0.7406135201454163,
-    0.10360293090343475,
-    0.31207337975502014,
-    0.06333297491073608
+    0.20479264855384827,
+    0.09128478914499283,
+    0.13805125653743744,
+    0.03895444795489311
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2305,30 +2311,30 @@
      "score": 0.117
     }
    ],
-   "gen_ms": 12805,
-   "check_ms": 833,
-   "judge_ms": 1014,
-   "cost_usd": 0.0001822,
+   "gen_ms": 24540,
+   "check_ms": 991,
+   "judge_ms": 1012,
+   "cost_usd": 0.0001978,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 605,
-    "completion_tokens": 102,
-    "total_tokens": 707
+    "completion_tokens": 128,
+    "total_tokens": 733
    },
-   "judge_cost_usd": 0.0002502,
-   "check_cost_usd": 1.1569444444444444e-05
+   "judge_cost_usd": 0.0002614,
+   "check_cost_usd": 1.376388888888889e-05
   },
   {
    "question": "Why is emergency treatment abroad reimbursed at Indian rates?",
    "expect": "outside|India|exclu|not covered|incorrect|not correct",
    "category": "contradicted",
-   "answer": "The policy extracts do not explain why emergency treatment abroad is reimbursed at Indian rates. They only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! state that it is, as per the intranet-wiki-export.txt#7: \"Emergency treatment taken abroad is reimbursed at Indian tariff rates.\"",
+   "answer": "The policy extracts do not explain why emergency treatment abroad is reimbursed at Indian rates. They only state that it is, as per the intranet-wiki-export.txt#7 extract.",
    "correct": true,
-   "grounding": 0.09143920242786407,
+   "grounding": 0.26777979731559753,
    "signals": {
     "retrieval": 0.5086352229118347,
-    "mean_logprob": -0.09119715493472408,
-    "min_logprob": -1.4860012531280518,
+    "mean_logprob": -0.048461372498577265,
+    "min_logprob": -0.4160400927066803,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -2337,19 +2343,19 @@
    },
    "judge": {
     "verdict": "not_in_source",
-    "confidence": 0.8,
-    "reason": "GOVERNED extracts do not address reimbursement rates for emergency treatment abroad",
+    "confidence": 1.0,
+    "reason": "No GOVERNED extract explains the reason for reimbursement at Indian rates.",
     "ran": true,
-    "cost_usd": 0.00024080000000000003,
+    "cost_usd": 0.00023620000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
    "best_span": 1,
    "span_scores": [
-    0.06237814575433731,
-    0.09143920242786407,
-    0.05734434723854065,
-    0.028720390051603317
+    0.10198405385017395,
+    0.26777979731559753,
+    0.039163004606962204,
+    0.01229277066886425
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2374,53 +2380,47 @@
      "score": 0.291
     }
    ],
-   "gen_ms": 6419,
-   "check_ms": 661,
-   "judge_ms": 1023,
-   "cost_usd": 0.0002124,
+   "gen_ms": 2179,
+   "check_ms": 554,
+   "judge_ms": 1085,
+   "cost_usd": 0.00014160000000000003,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 591,
-    "completion_tokens": 157,
-    "total_tokens": 748
+    "completion_tokens": 39,
+    "total_tokens": 630
    },
-   "judge_cost_usd": 0.00024080000000000003,
-   "check_cost_usd": 9.180555555555556e-06
+   "judge_cost_usd": 0.00023620000000000002,
+   "check_cost_usd": 7.694444444444446e-06
   },
   {
    "question": "How long do you actually take to settle a claim, 30 or 45 days?",
    "expect": "30|thirty",
    "category": "ungoverned",
-   "answer": "According to the policy extracts, there are conflicting answers. \n\nThe sample-policy.txt#5 extract states that the company shall settle or reject a claim within 30 days of receiving the last necessary document. \n\nHowever, the intranet-wiki-export.txt#7 extract states that you have 45 days from receipt of the last document to settle a claim. \n\nIt is unclear which one is the actual time frame used, as the policy and the wiki export seem to have different information.",
+   "answer": "The policy extract [sample-policy.txt#5] states that the company shall settle or reject a claim within thirty (30) days of receiving the last necessary document. However, the intranet wiki export [intranet-wiki-export.txt#7] mentions that the company has 45 days from receipt of the last document to settle a claim. Since the policy document and the intranet wiki export are contradictory, I cannot provide a definitive answer based on the provided extracts.",
    "correct": true,
-   "grounding": 0.24942855536937714,
+   "grounding": 0.4699563682079315,
    "signals": {
     "retrieval": 0.7461177110671997,
-    "mean_logprob": -0.09227034600821545,
-    "min_logprob": -0.9750495553016663,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
-    "abstains": false,
+    "abstains": true,
     "asserts_premise": false
    },
-   "judge": {
-    "verdict": "supported",
-    "confidence": 1.0,
-    "reason": "GOVERNED extract establishes 30-day timeframe",
-    "ran": true,
-    "cost_usd": 0.000219,
-    "cost_source": "estimated",
-    "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
-   },
+   "judge": null,
    "best_span": 2,
    "span_scores": [
-    0.21733282506465912,
-    0.1307719647884369,
-    0.24942855536937714,
-    0.06225412338972092
+    0.26158836483955383,
+    0.1612887680530548,
+    0.4699563682079315,
+    0.1460191309452057
    ],
-   "ungoverned_sources": [],
+   "ungoverned_sources": [
+    "intranet-wiki-export.txt"
+   ],
    "sources": [
     {
      "source": "sample-policy.txt",
@@ -2443,18 +2443,18 @@
      "score": 0.324
     }
    ],
-   "gen_ms": 2217,
-   "check_ms": 687,
-   "judge_ms": 1014,
-   "cost_usd": 0.0001526,
+   "gen_ms": 12760,
+   "check_ms": 803,
+   "judge_ms": 0,
+   "cost_usd": 0.00014800000000000002,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 466,
-    "completion_tokens": 99,
-    "total_tokens": 565
+    "prompt_tokens": 446,
+    "completion_tokens": 98,
+    "total_tokens": 544
    },
-   "judge_cost_usd": 0.000219,
-   "check_cost_usd": 9.541666666666667e-06
+   "judge_cost_usd": null,
+   "check_cost_usd": 1.1152777777777778e-05
   },
   {
    "question": "Can a member claim for routine dental scaling under the wellness benefit?",
@@ -2465,8 +2465,8 @@
    "grounding": 0.9242804646492004,
    "signals": {
     "retrieval": 0.607022225856781,
-    "mean_logprob": -0.014219284840952409,
-    "min_logprob": -0.25196436047554016,
+    "mean_logprob": -0.017714940599145586,
+    "min_logprob": -0.31328752636909485,
     "logprobs_available": true,
     "pii": {},
     "reask": false,
@@ -2476,9 +2476,9 @@
    "judge": {
     "verdict": "contradicted",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 5.2 excludes dental treatment unless hospitalisation is required following accidental injury",
+    "reason": "GOVERNED extract 5.2 excludes dental treatment unless hospitalisation follows accidental injury",
     "ran": true,
-    "cost_usd": 0.0002366,
+    "cost_usd": 0.00023540000000000003,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
@@ -2514,9 +2514,9 @@
      "score": 0.228
     }
    ],
-   "gen_ms": 953,
-   "check_ms": 417,
-   "judge_ms": 1583,
+   "gen_ms": 1275,
+   "check_ms": 441,
+   "judge_ms": 1232,
    "cost_usd": 0.0001316,
    "cost_source": "estimated",
    "usage": {
@@ -2524,16 +2524,16 @@
     "completion_tokens": 20,
     "total_tokens": 618
    },
-   "judge_cost_usd": 0.0002366,
-   "check_cost_usd": 5.7916666666666666e-06
+   "judge_cost_usd": 0.00023540000000000003,
+   "check_cost_usd": 6.125000000000001e-06
   },
   {
    "question": "Is there a sub-limit on ICU charges, or are they covered in full?",
    "expect": "5\\s?%|five per ?cent",
    "category": "ungoverned",
-   "answer": "ICU charges are capped at 5% of the sum insured per day, according to section 4.2 of the sample-policy.txt. This implies that there is a sub-limit on ICU charges, and they are not covered in full.",
+   "answer": "ICU charges are capped at 5% of the sum insured per day, according to section 4.2 of the sample-policy.txt. This implies that there is a sub-limit, rather than full coverage.",
    "correct": true,
-   "grounding": 0.4836670756340027,
+   "grounding": 0.5142027139663696,
    "signals": {
     "retrieval": 0.5896146297454834,
     "mean_logprob": null,
@@ -2541,16 +2541,24 @@
     "logprobs_available": false,
     "pii": {},
     "reask": false,
-    "abstains": true,
+    "abstains": false,
     "asserts_premise": false
    },
-   "judge": null,
+   "judge": {
+    "verdict": "supported",
+    "confidence": 1.0,
+    "reason": "GOVERNED extract 4.2 establishes the answer",
+    "ran": true,
+    "cost_usd": 0.00023740000000000002,
+    "cost_source": "estimated",
+    "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
+   },
    "best_span": 1,
    "span_scores": [
-    0.20204363763332367,
-    0.4836670756340027,
-    0.08564876765012741,
-    0.01788582094013691
+    0.041264329105615616,
+    0.5142027139663696,
+    0.044201068580150604,
+    0.007631455082446337
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2575,31 +2583,31 @@
      "score": 0.339
     }
    ],
-   "gen_ms": 4527,
-   "check_ms": 590,
-   "judge_ms": 0,
-   "cost_usd": 0.0001476,
+   "gen_ms": 7387,
+   "check_ms": 599,
+   "judge_ms": 1215,
+   "cost_usd": 0.000144,
    "cost_source": "estimated",
    "usage": {
     "prompt_tokens": 588,
-    "completion_tokens": 50,
-    "total_tokens": 638
+    "completion_tokens": 44,
+    "total_tokens": 632
    },
-   "judge_cost_usd": null,
-   "check_cost_usd": 8.194444444444445e-06
+   "judge_cost_usd": 0.00023740000000000002,
+   "check_cost_usd": 8.319444444444444e-06
   },
   {
    "question": "Are injuries from an organised adventure sports event covered?",
    "expect": "hazardous|adventure|exclu|not covered|professional",
    "category": "ungoverned",
-   "answer": "According to the MACRO: adventure_sports, \"Injuries from adventure sports are covered as long as the activity was organised by a licensed operator.\" However, it's also important to note the exclusion in sample-policy.txt#4, section 5.4, which states that expenses arising from participation in hazardous or adventure sports in a professional capacity are excluded. \n\nSo, injuries from an organised adventure sports event are covered, but only if the participant is not a professional.",
+   "answer": "According to the policy extracts, injuries from adventure sports are covered as long as the activity was organised by a licensed operator (MACRO: adventure_sports). However, there is an exclusion for expenses arising from participation in hazardous or adventure sports in a professional capacity (SECTION 5.4). If the event is participated in as an amateur, it appears to be covered.",
    "correct": true,
-   "grounding": 0.20265640318393707,
+   "grounding": 0.14885208010673523,
    "signals": {
     "retrieval": 0.4564816653728485,
-    "mean_logprob": -0.04352062237655945,
-    "min_logprob": -0.7511786222457886,
-    "logprobs_available": true,
+    "mean_logprob": null,
+    "min_logprob": null,
+    "logprobs_available": false,
     "pii": {},
     "reask": false,
     "abstains": false,
@@ -2608,18 +2616,18 @@
    "judge": {
     "verdict": "supported",
     "confidence": 1.0,
-    "reason": "GOVERNED extract 5.4 establishes the condition for coverage",
+    "reason": "GOVERNED extract SECTION 5.4 provides a relevant exclusion",
     "ran": true,
-    "cost_usd": 0.00023800000000000004,
+    "cost_usd": 0.00023380000000000002,
     "cost_source": "estimated",
     "model": "openrouter/meta-llama/llama-3.3-70b-instruct"
    },
-   "best_span": 0,
+   "best_span": 1,
    "span_scores": [
-    0.20265640318393707,
-    0.07128840684890747,
-    0.04916182905435562,
-    0.024776553735136986
+    0.08038240671157837,
+    0.14885208010673523,
+    0.04593370482325554,
+    0.018600594252347946
    ],
    "ungoverned_sources": [],
    "sources": [
@@ -2644,18 +2652,18 @@
      "score": 0.261
     }
    ],
-   "gen_ms": 1916,
-   "check_ms": 736,
-   "judge_ms": 1128,
-   "cost_usd": 0.0001678,
+   "gen_ms": 10589,
+   "check_ms": 687,
+   "judge_ms": 1990,
+   "cost_usd": 0.0001512,
    "cost_source": "estimated",
    "usage": {
-    "prompt_tokens": 551,
-    "completion_tokens": 96,
-    "total_tokens": 647
+    "prompt_tokens": 531,
+    "completion_tokens": 75,
+    "total_tokens": 606
    },
-   "judge_cost_usd": 0.00023800000000000004,
-   "check_cost_usd": 1.0222222222222223e-05
+   "judge_cost_usd": 0.00023380000000000002,
+   "check_cost_usd": 9.541666666666667e-06
   }
  ]
 }
