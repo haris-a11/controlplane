@@ -6,8 +6,8 @@ at any threshold. Numbers are from one run on a 40-question set —
 directional, not a benchmark.
 
 - Raw model accuracy before any checking: **88%**
-- Tier 0 + Tier 1 checking cost: median **612 ms**, p95 **991 ms**
-- Log-probabilities available from this provider: **no — Tier 0 degraded**
+- Tier 0 + Tier 1 checking cost: median **548 ms**, p95 **1030 ms**
+- Log-probabilities available from this provider: **yes**
 
 ## At each use case's shipped thresholds
 
@@ -16,9 +16,9 @@ differs between these rows.
 
 | Use case | Flag rate | False positive | False negative | Escalation | Abstained | Tier 2 share |
 |---|---|---|---|---|---|---|
-| `support` | 35% | 29% | 20% | 25% | 35% | 40% |
-| `copilot` | 30% | 26% | 40% | 18% | 35% | 28% |
-| `decision_support` | 42% | 37% | 20% | 35% | 35% | 70% |
+| `support` | 32% | 29% | 40% | 22% | 40% | 38% |
+| `copilot` | 32% | 29% | 40% | 18% | 40% | 35% |
+| `decision_support` | 35% | 31% | 40% | 32% | 40% | 65% |
 
 ## Ablation: which check is doing the work
 
@@ -28,40 +28,23 @@ decided differently. Profile `support`, at its shipped thresholds.
 
 | Tier 2 judge | Governance tier | False negative | False positive | Flag rate |
 |---|---|---|---|---|
-| on | on | 20% | 29% | 35% |
-| on | off | 60% | 26% | 28% |
-| off | on | 20% | 29% | 35% |
-| off | off | 60% | 26% | 28% |
+| on | on | 40% | 29% | 32% |
+| on | off | 60% | 23% | 25% |
+| off | on | 60% | 29% | 30% |
+| off | off | 80% | 23% | 22% |
 
-Neither check on, **60%** of wrong answers are released; with both, **20%**.
+Neither check on, **80%** of wrong answers are released; with both, **40%**.
 
-**The governance check is doing all of the work, and Tier 2 is not paying for itself here.**
-Governance alone reaches the same 20% false-negative rate as
-both together, while the judge alone leaves it at 60% — and
-adding the judge on top raises false positives from 29% to
-29% for no corresponding gain.
+**Both checks earn their place: each catches wrong answers the other**
+**misses.** Governance alone leaves 60% of wrong answers
+released and the judge alone 60%; together, 40%.
 
-This is worth being precise about rather than claiming two wins. The rows
-Tier 2 needed to catch scored **0.92–0.97** for groundedness with confident
-log-probabilities: no gate built on how the *answer looks* selects them,
-because looking fine is what a confident hallucination does. The only
-signal that fired was where the supporting span came from — so the judge
-is now triggered by provenance doubt (`needs_judge` → `ungoverned_source`)
-and is, on this corpus, downstream of the check that already caught them.
-
-The honest reading: **a cheap provenance lookup beat a second model call**
-at the failure both were built for. Tier 2 is kept because it is the only
-mechanism that can catch a semantic error in a corpus with uniform
-provenance — a case this corpus, by construction, does not contain — and
-because `judge_always` is what the regulated profile is buying. On this
-evidence it should not be on by default for a support route.
-
-Judge verdicts across the set: `contradicted` 6, `not_in_source` 1, `supported` 20.
+Judge verdicts across the set: `contradicted` 7, `not_in_source` 1, `supported` 17.
 
 
 ## Answers grounded only in a loosely governed source
 
-**4 of 40** answers were supported by a span from
+**6 of 40** answers were supported by a span from
 `corpus/ungoverned/` with no governed span behind them; **2**
 of those were wrong. This is the failure groundedness cannot see: the
 answer is faithful to what it was shown, and what it was shown is stale.
@@ -76,12 +59,12 @@ ones. There is no setting that does both. This is the dial in the console.
 
 | Block threshold | Flag rate | False positive | False negative |
 |---|---|---|---|
-| 0.00 | 25% | 20% | 40% |
-| 0.18 | 28% | 23% | 40% |
-| 0.36 | 35% | 29% | 20% |
-| 0.54 | 42% | 37% | 20% |
-| 0.72 | 65% | 63% | 20% |
-| 0.90 | 65% | 63% | 20% |
+| 0.00 | 28% | 23% | 40% |
+| 0.18 | 32% | 29% | 40% |
+| 0.36 | 32% | 29% | 40% |
+| 0.54 | 35% | 31% | 40% |
+| 0.72 | 60% | 60% | 40% |
+| 0.90 | 60% | 60% | 40% |
 
 ## Same checker, different models
 
@@ -93,7 +76,7 @@ the same decision as risk.
 | Model | Accuracy | Flagged | False positive | False negative | Abstained |
 |---|---|---|---|---|---|
 | `llama-3.1-8b-instruct` | 62% | 38% | 16% | 27% (15 wrong) | 32% |
-| `llama-3.3-70b-instruct` | 88% | 35% | 29% | 20% (5 wrong) | 35% |
+| `llama-3.3-70b-instruct` | 88% | 32% | 29% | 40% (5 wrong) | 40% |
 
 Rates over a handful of wrong answers are not stable estimates — the counts are shown for that reason.
 
@@ -102,10 +85,10 @@ Rates over a handful of wrong answers are not stable estimates — the counts ar
 
 Findings from the runs above, including the ones that did not work.
 
-**A wrong answer can score as well grounded.** `What is the ICU charge cap?` was answered
-incorrectly and still scored **0.97** grounding — above the
+**A wrong answer can score as well grounded.** `Can a member claim for routine dental scaling under the wellness benefit?` was answered
+incorrectly and still scored **0.92** grounding — above the
 release threshold for every profile.
-The supporting span came from `support-macros.txt` — a source
+The supporting span came from `intranet-wiki-export.txt` — a source
 with no owner that contradicts the governed policy. The answer is
 faithful to what it was shown; what it was shown was wrong.
 Groundedness measures whether an answer *echoes* the source, not
@@ -136,16 +119,16 @@ confidence, but the assumption that a deployment has one known capability is wro
 
 | Metric | Round 1 target | Measured |
 |---|---|---|
-| Fast-path p95 | < 150 ms | **991 ms** (checks only) |
+| Fast-path p95 | < 150 ms | **1030 ms** (checks only) |
 | Verification share | 12% of traffic | 100% — see below |
-| Cost overhead, Tier 0+1 only | ~3% of inference spend | **7.9%** |
-| Cost overhead, with Tier 2 on every row | ~3% | **122%** |
+| Cost overhead, Tier 0+1 only | ~3% of inference spend | **7.3%** |
+| Cost overhead, with Tier 2 on every row | ~3% | **113%** |
 
 **The cost target is the right order of magnitude for the cheap tiers and**
 **collapses the moment a second model call is involved.** Tier 0 and Tier 1
-together add **7.9%** — about 3x the ~3% target, though still small enough that nobody re-plans a budget around it, because a
+together add **7.3%** — about 2x the ~3% target, though still small enough that nobody re-plans a budget around it, because a
 110M CPU classifier is nearly free next to a generation. Judging every
-response instead costs **122%**: the judge re-reads the whole retrieved
+response instead costs **113%**: the judge re-reads the whole retrieved
 context to produce one word of verdict, so it roughly doubles the spend on
 any response it touches.
 
