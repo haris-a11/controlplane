@@ -1,7 +1,7 @@
-# --- secrets -----------------------------------------------------------------
+
 .env
 
-# --- generated at runtime ----------------------------------------------------
+
 controlplane.db          # audit log, rebuilt by any request
 *.db
 __pycache__/
@@ -11,24 +11,22 @@ venv/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# --- model / HF caches -------------------------------------------------------
+
 .cache/
 models/
 
-# --- OS / editor -------------------------------------------------------------
+
 .DS_Store
 Thumbs.db
 *.swp
 .idea/
 .vscode/
 
-# --- challenge briefs (Accenture's documents, not ours) ----------------------
+
 *Problem Statements*.pdf
 accenture_innovation_challenge_*.pdf
 
-# --- Round 1 submission artifacts (~39 MB, superseded by Round 2) ------------
-# Decks and video belong in the submission portal, not in git history.
-# The Round 1 video is already public: youtube.com/watch?v=CbFoLbL_spM
+
 *.pptx
 *.ppt
 *.key
@@ -36,12 +34,13 @@ accenture_innovation_challenge_*.pdf
 fremen_controlPlane.ai.pdf
 fremen_contorlPlane.ai.pptx
 
-# --- large media -------------------------------------------------------------
+
+PROTOTYPE-PLAN.md
+proposal-deck.html
+controlplane-prior-art.html
+
+
 *.mp4
 *.mov
 *.avi
 *.mkv
-# The Round 2 demo video is a required deliverable. Prefer a README link
-# (as Round 1 did). To commit it instead, drop it at demo/demo.mp4 and
-# uncomment the next line:
-# !demo/demo.mp4

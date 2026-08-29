@@ -10,7 +10,21 @@ Status: **working end to end, and measured.** Numbers in [`RESULTS.md`](RESULTS.
 including the ones that missed their target and the mechanism that turned out not to
 pay for itself.
 
-**Contents.** [Run it](#run-it) · [**Business proposal — five pages**](#business-proposal--five-pages)
+## Demo video
+
+**Five-minute prototype demo:** <!-- ROUND 2 VIDEO URL --> _link to follow_
+
+A real policy document, a fictional insurer, and a hand-built answer key. It opens on the
+question Round 1 opened on — a health-insurance waiting period answered confidently and
+wrongly — and then shows the working system catching it: the premise signal at Tier 0, the
+judge's `false_premise` verdict, the repair, the same decision replayed under three policy
+profiles, an answer faithful to an ownerless source, and the tuning dial moved on camera.
+Script and shot list: [`docs/video-script.md`](docs/video-script.md).
+
+Round 1's three-minute concept video, for continuity:
+[youtube.com/watch?v=CbFoLbL_spM](https://www.youtube.com/watch?v=CbFoLbL_spM)
+
+**Contents.** [Demo video](#demo-video) · [Run it](#run-it) · [**Business proposal — five pages**](#business-proposal--five-pages)
 · [What the brief asked for](#what-the-brief-asked-for-and-where-each-piece-is)
 · [The core mechanism](#the-core-mechanism) · [Assumptions](#reference-parameters-and-assumptions)
 · [Prior art](#where-the-ideas-come-from) · [What the measurement found](#what-the-measurement-found)
@@ -298,8 +312,10 @@ number is a policy choice, and the console shows what moving it costs in missed 
 | **4 · Optimise** | It does not cut spend directly | It produces the evidence that makes downgrading to a smaller model *safe* — and fewer wrong answers means fewer re-asks. The 88%-vs-62% comparison is that argument as a measurement |
 
 **Where the moat is, stated plainly.** Every individual component ships elsewhere — a
-63-source prior-art scan is published in this repo. Detection is commoditised. What
-nothing in that scan does is join the **cost axis to the risk decision**, expose the
+survey of 63 existing tools stands behind
+[Where the ideas come from](#where-the-ideas-come-from) below, which names the ones that
+shaped this design. Detection is commoditised. What
+nothing in that survey does is join the **cost axis to the risk decision**, expose the
 **tuning tradeoff as the product surface** rather than hiding a chosen threshold, or treat
 **data provenance as a first-class check**. Composing mature detectors and spending the
 engineering on the router is the choice a competent staff engineer makes, and saying so
@@ -489,10 +505,10 @@ from the simulation.
 
 ## Where the ideas come from
 
-Everything except the router already ships as a mature product — the scan in
-[`controlplane-prior-art.html`](controlplane-prior-art.html) maps 63 of them. Composing
-rather than rebuilding is the deliberate choice, and it is stated here rather than left
-for a judge to discover.
+Everything except the router already ships as a mature product. A survey of 63 of them
+sits behind this table, which names the ones that actually shaped the design and what was
+taken from each. Composing rather than rebuilding is the deliberate choice, and it is
+stated here rather than left for a judge to discover.
 
 | Idea | Prior art | What was taken | What is different here |
 |---|---|---|---|
@@ -717,6 +733,14 @@ audit trail.
 
 ## Prior art
 
-[`controlplane-prior-art.html`](controlplane-prior-art.html) maps 63 existing tools onto
-this architecture. The contribution is [`router.py`](controlplane/router.py) and the
-measurement around it; everything else is composed, and the table above says from what.
+Sixty-three existing tools were surveyed against this architecture, and the ones that
+shaped it are named under [Where the ideas come from](#where-the-ideas-come-from). The
+contribution is [`router.py`](controlplane/router.py) and the measurement around it;
+everything else is composed, and that table says from what.
+
+## Licence
+
+Apache-2.0 — see [`LICENSE`](LICENSE). Chosen over MIT for the patent grant, and because
+it matches the licence on the model weights this repo leans on: Vectara HHEM-2.1-Open
+(Tier 1) and `all-MiniLM-L6-v2` (retrieval) are both Apache-2.0, as are `transformers`,
+`sentence-transformers` and `huggingface-hub`. Nothing in the dependency tree is copyleft.
